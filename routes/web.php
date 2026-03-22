@@ -21,3 +21,11 @@ Route::get('/transactions', function () {
 Route::get('/wallets', function () {
     return view('wallets');
 })->name('wallets');
+
+Route::get('/budgets', function () {
+    return view('budgets');
+})->name('budgets');
+
+Route::get('/reports', function () {
+    return view('reports');
+})->name('reports');

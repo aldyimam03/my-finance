@@ -31,12 +31,12 @@
                 <span class="material-symbols-outlined {{ request()->routeIs('wallets') ? '[font-variation-settings:\'FILL\'_1]' : '' }}" data-icon="account_balance_wallet">account_balance_wallet</span>
                 <span class="text-[14px]">Dompet</span>
             </a>
-            <a class="flex items-center gap-3 px-4 py-3 text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5 transition-all duration-200" href="#">
-                <span class="material-symbols-outlined" data-icon="pie_chart">pie_chart</span>
+            <a class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('budgets') ? 'text-[#adc6ff] font-semibold border-r-2 border-[#adc6ff] bg-white/5' : 'text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5' }} transition-all duration-200" href="{{ route('budgets') }}">
+                <span class="material-symbols-outlined {{ request()->routeIs('budgets') ? '[font-variation-settings:\'FILL\'_1]' : '' }}" data-icon="pie_chart">pie_chart</span>
                 <span class="text-[14px]">Anggaran</span>
             </a>
-            <a class="flex items-center gap-3 px-4 py-3 text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5 transition-all duration-200" href="#">
-                <span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+            <a class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('reports') ? 'text-[#adc6ff] font-semibold border-r-2 border-[#adc6ff] bg-white/5' : 'text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5' }} transition-all duration-200" href="{{ route('reports') }}">
+                <span class="material-symbols-outlined {{ request()->routeIs('reports') ? '[font-variation-settings:\'FILL\'_1]' : '' }}" data-icon="assessment">assessment</span>
                 <span class="text-[14px]">Laporan</span>
             </a>
         </nav>
