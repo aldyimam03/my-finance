@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html class="dark" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>{{ $title ?? 'My Finance - Obsidian Ledger' }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+
+<body class="bg-background text-on-surface font-body antialiased selection:bg-primary/30">
+    <main class="min-h-screen flex flex-col md:flex-row overflow-hidden">
+        <!-- Left Side: Visual Anchor -->
+        <section
+            class="relative hidden md:flex md:w-1/2 lg:w-3/5 items-center justify-center p-12 lg:p-24 overflow-hidden">
+            <!-- Background Image with Overlay -->
+            <div class="absolute inset-0 z-0">
+                <img alt="Dark obsidian textures with glass reflections" class="w-full h-full object-cover"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCueAow910rrdi3aHEySryMm6yJUuNtDzV8ziQvjUZsp0PizZmp6bjt370X4Jl0hR6UlUBibg_SRoi6N13oFLfdnZkHRQ5G5yvwmFowhlE_TgRIgQN0MI70H-cbLIDsRqclm40seK_ez_i7VrF2KM4ZY0zok4HwtRAhtRMubXHKRtZZ2NnrUmURdc_9OGf3PxH2uQbXnmpV1hPgdSAY9RCk4Ya-IGb_IBbGVhPmXNupNEV4CIiiBgo88pf65jNA8d1HVxtITGVRcY" />
+                <div
+                    class="absolute inset-0 bg-gradient-to-tr from-surface-container-lowest via-transparent to-transparent opacity-80">
+                </div>
+                <div class="absolute inset-0 bg-surface-container-lowest/20 backdrop-blur-[2px]"></div>
+            </div>
+            <!-- Content -->
+            <div class="relative z-10 w-full max-w-2xl">
+                <div class="mb-12">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div
+                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center shadow-lg shadow-primary/20">
+                            <span class="material-symbols-outlined text-on-primary text-3xl"
+                                data-icon="account_balance_wallet">account_balance_wallet</span>
+                        </div>
+                        <span class="text-2xl font-bold tracking-tight text-on-surface">My Finance</span>
+                    </div>
+                    <h1
+                        class="font-headline font-semibold text-on-surface leading-[1.1] tracking-tight text-[3.5rem] mb-6">
+                        Masa Depan <br />
+                        <span class="text-primary">Kekayaan Pribadi.</span>
+                    </h1>
+                    <p class="text-on-surface-variant text-lg max-w-md leading-relaxed">
+                        Kelola aset Anda dengan presisi Obsidian Ledger. Keamanan perbankan swasta dalam genggaman Anda.
+                    </p>
+                </div>
+                <!-- Subtle Data Point Visualization (Signature Component) -->
+                <div class="obsidian-glass p-8 rounded-xl flex items-center justify-between gap-8 max-w-sm">
+                    <div>
+                        <span
+                            class="block text-[11px] uppercase tracking-[0.1em] text-on-surface-variant mb-1">Portfolio
+                            Aktif</span>
+                        <span class="text-2xl font-bold text-secondary">IDR 2.4B</span>
+                    </div>
+                    <div class="flex gap-1 items-end h-8">
+                        <div class="w-1 bg-secondary rounded-full h-1/2 opacity-40"></div>
+                        <div class="w-1 bg-secondary rounded-full h-2/3 opacity-60"></div>
+                        <div class="w-1 bg-secondary rounded-full h-full"></div>
+                        <div class="w-1 bg-secondary rounded-full h-4/5"></div>
+                        <div class="w-1 bg-secondary rounded-full h-full opacity-80"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Branding Subtle Footer -->
+            <div class="absolute bottom-12 left-12 lg:left-24">
+                <span class="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant/40">© {{ date('Y') }} Obsidian
+                    Technologies</span>
+            </div>
+        </section>
+        
+        <!-- Right Side: Dynamic Content -->
+        <section
+            class="flex-1 flex items-center justify-center p-6 sm:p-12 lg:p-24 bg-surface md:bg-surface-container-low relative">
+            <div class="w-full max-w-[420px]">
+                <!-- Mobile Logo (Visible only on small screens) -->
+                <div class="md:hidden flex items-center gap-3 mb-12">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center">
+                        <span class="material-symbols-outlined text-on-primary text-2xl"
+                            data-icon="account_balance_wallet">account_balance_wallet</span>
+                    </div>
+                    <span class="text-xl font-bold tracking-tight text-on-surface">My Finance</span>
+                </div>
+                
+                <!-- Main Slot Content -->
+                {{ $slot }}
+
+                <!-- Legal/Help Subtle Links -->
+                <div
+                    class="mt-24 md:absolute md:bottom-12 md:left-1/2 md:-translate-x-1/2 flex items-center gap-6 justify-center w-full">
+                    <a class="text-[10px] uppercase tracking-[0.1em] text-on-surface-variant/50 hover:text-on-surface transition-colors"
+                        href="#">Bantuan</a>
+                    <div class="w-1 h-1 rounded-full bg-outline-variant/30"></div>
+                    <a class="text-[10px] uppercase tracking-[0.1em] text-on-surface-variant/50 hover:text-on-surface transition-colors"
+                        href="#">Privasi</a>
+                    <div class="w-1 h-1 rounded-full bg-outline-variant/30"></div>
+                    <a class="text-[10px] uppercase tracking-[0.1em] text-on-surface-variant/50 hover:text-on-surface transition-colors"
+                        href="#">Keamanan</a>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>
