@@ -12,7 +12,7 @@
 
 <body class="bg-surface text-on-surface font-body selection:bg-primary/30">
     <!-- SideNavBar Shell -->
-    <aside class="h-screen w-64 fixed left-0 top-0 border-r border-white/5 bg-[#1c1b1b] dark:bg-[#1c1b1b] flex flex-col py-8 px-6 z-50 shadow-2xl shadow-black/40 font-['Inter'] antialiased tracking-tight">
+    <aside class="h-screen w-64 fixed left-0 top-0 border-r border-white/5 bg-surface-container-low dark:bg-surface-container-low flex flex-col py-8 px-6 z-50 shadow-2xl shadow-black/40 font-['Inter'] antialiased tracking-tight">
         <div class="mb-10 px-2">
             <h1 class="text-xl font-semibold tracking-tight text-[#e5e2e1]">My Finance</h1>
             <p class="text-[11px] uppercase tracking-[0.05em] text-on-surface-variant opacity-60">Obsidian Ledger</p>
@@ -23,12 +23,12 @@
                 <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
                 <span class="text-[14px]">Dasbor</span>
             </a>
-            <a class="flex items-center gap-3 px-4 py-3 text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5 transition-all duration-200" href="#">
+            <a class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('transactions') ? 'text-[#adc6ff] font-semibold border-r-2 border-[#adc6ff] bg-white/5' : 'text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5' }} transition-all duration-200" href="{{ route('transactions') }}">
                 <span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
                 <span class="text-[14px]">Transaksi</span>
             </a>
-            <a class="flex items-center gap-3 px-4 py-3 text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5 transition-all duration-200" href="#">
-                <span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+            <a class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('wallets') ? 'text-[#adc6ff] font-semibold border-r-2 border-[#adc6ff] bg-white/5' : 'text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5' }} transition-all duration-200" href="{{ route('wallets') }}">
+                <span class="material-symbols-outlined {{ request()->routeIs('wallets') ? '[font-variation-settings:\'FILL\'_1]' : '' }}" data-icon="account_balance_wallet">account_balance_wallet</span>
                 <span class="text-[14px]">Dompet</span>
             </a>
             <a class="flex items-center gap-3 px-4 py-3 text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5 transition-all duration-200" href="#">
@@ -41,7 +41,7 @@
             </a>
         </nav>
         <div class="mt-auto space-y-1">
-            <button class="w-full mb-6 py-3 bg-gradient-to-br from-primary to-primary-container text-on-primary font-semibold rounded-xl text-sm shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform">
+            <button class="w-full mb-6 py-3 bg-linear-to-br from-primary to-primary-container text-on-primary font-semibold rounded-xl text-sm shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform">
                 Tambah Transaksi
             </button>
             <a class="flex items-center gap-3 px-4 py-2 text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5 transition-all duration-200" href="#">
@@ -64,7 +64,7 @@
         <div class="flex items-center gap-6">
             <button class="relative text-[#e5e2e1]/80 hover:text-white transition-colors">
                 <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
-                <span class="absolute top-0 right-0 w-2 h-2 bg-tertiary-container rounded-full border-2 border-[#1c1b1b]"></span>
+                <span class="absolute top-0 right-0 w-2 h-2 bg-tertiary-container rounded-full border-2 border-surface-container-low"></span>
             </button>
             <div class="flex items-center gap-3 pl-6 border-l border-white/10">
                 <div class="text-right">
@@ -82,7 +82,7 @@
     </main>
 
     <!-- Global Visual Floating FAB -->
-    <button class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-full shadow-2xl shadow-primary/40 flex items-center justify-center group active:scale-95 transition-all hover:opacity-90">
+    <button class="fixed bottom-8 right-8 w-14 h-14 bg-linear-to-br from-primary to-primary-container text-on-primary rounded-full shadow-2xl shadow-primary/40 flex items-center justify-center group active:scale-95 transition-all hover:opacity-90">
         <span class="material-symbols-outlined text-3xl transition-transform group-hover:rotate-90" data-icon="add">add</span>
     </button>
 </body>
