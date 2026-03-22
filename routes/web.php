@@ -29,3 +29,7 @@ Route::get('/budgets', function () {
 Route::get('/reports', function () {
     return view('reports');
 })->name('reports');
+
+Route::get('/settings', function () {
+    return view('settings');
+})->name('settings');

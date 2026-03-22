@@ -7,10 +7,12 @@
     <title>{{ $title ?? 'Dashboard - My Finance' }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-surface text-on-surface font-body selection:bg-primary/30">
+<body class="bg-surface text-on-surface font-body selection:bg-primary/30" x-data="{ isTransactionModalOpen: false }" @keydown.escape="isTransactionModalOpen = false" :class="isTransactionModalOpen ? 'overflow-hidden' : ''">
     <!-- SideNavBar Shell -->
     <aside class="h-screen w-64 fixed left-0 top-0 border-r border-white/5 bg-surface-container-low dark:bg-surface-container-low flex flex-col py-8 px-6 z-50 shadow-2xl shadow-black/40 font-['Inter'] antialiased tracking-tight">
         <div class="mb-10 px-2">
@@ -41,11 +43,11 @@
             </a>
         </nav>
         <div class="mt-auto space-y-1">
-            <button class="w-full mb-6 py-3 bg-linear-to-br from-primary to-primary-container text-on-primary font-semibold rounded-xl text-sm shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform">
+            <button @click="isTransactionModalOpen = true" class="w-full mb-6 py-3 bg-linear-to-br from-primary to-primary-container text-on-primary font-semibold rounded-xl text-sm shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform">
                 Tambah Transaksi
             </button>
-            <a class="flex items-center gap-3 px-4 py-2 text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5 transition-all duration-200" href="#">
-                <span class="material-symbols-outlined" data-icon="settings">settings</span>
+            <a class="flex items-center gap-3 px-4 py-2 {{ request()->routeIs('settings') ? 'text-[#adc6ff] font-semibold border-r-2 border-[#adc6ff] bg-white/5' : 'text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5' }} transition-all duration-200" href="{{ route('settings') }}">
+                <span class="material-symbols-outlined {{ request()->routeIs('settings') ? '[font-variation-settings:\'FILL\'_1]' : '' }}" data-icon="settings">settings</span>
                 <span class="text-[14px]">Pengaturan</span>
             </a>
             <a class="flex items-center gap-3 px-4 py-2 text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5 transition-all duration-200" href="{{ route('login') }}">
@@ -82,9 +84,11 @@
     </main>
 
     <!-- Global Visual Floating FAB -->
-    <button class="fixed bottom-8 right-8 w-14 h-14 bg-linear-to-br from-primary to-primary-container text-on-primary rounded-full shadow-2xl shadow-primary/40 flex items-center justify-center group active:scale-95 transition-all hover:opacity-90">
+    <button @click="isTransactionModalOpen = true" class="fixed bottom-8 right-8 w-14 h-14 bg-linear-to-br from-primary to-primary-container text-on-primary rounded-full shadow-2xl shadow-primary/40 flex items-center justify-center group active:scale-95 transition-all hover:opacity-90 z-40">
         <span class="material-symbols-outlined text-3xl transition-transform group-hover:rotate-90" data-icon="add">add</span>
     </button>
+    
+    <x-transaction-modal />
 </body>
 
 </html>
