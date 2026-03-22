@@ -4,7 +4,7 @@
         <p class="text-on-surface-variant body-md">Lengkapi detail di bawah untuk memulai pengelolaan aset Anda secara profesional.</p>
     </div>
     
-    <form class="space-y-6">
+    <form action="{{ route('dashboard') }}" class="space-y-6">
         <!-- Name Input -->
         <div class="space-y-2">
             <label class="block text-[11px] uppercase tracking-[0.05em] text-on-surface-variant font-medium ml-1"
@@ -81,7 +81,7 @@
         <p class="text-on-surface-variant body-md">
             Sudah memiliki akun?
             <a class="text-primary font-semibold ml-1 hover:underline underline-offset-4 decoration-primary/30"
-                href="/">Masuk di sini</a>
+                href="{{ route('login') }}">Masuk di sini</a>
         </p>
     </div>
 </x-guest-layout>

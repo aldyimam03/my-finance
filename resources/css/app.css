@@ -82,12 +82,24 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+@utility glass-card {
+    background: rgba(53, 53, 52, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 @utility obsidian-gradient {
     background: linear-gradient(135deg, #131313 0%, #0e0e0e 100%);
 }
 
 @utility accent-gradient {
     background: linear-gradient(135deg, #adc6ff 0%, #4b8eff 100%);
+}
+
+@utility text-gradient-primary {
+    background: linear-gradient(135deg, #adc6ff 0%, #4b8eff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 @utility material-symbols-outlined {

@@ -4,7 +4,7 @@
         <p class="text-on-surface-variant body-md">Silakan masuk ke akun Obsidian Ledger Anda.</p>
     </div>
     
-    <form class="space-y-6">
+    <form action="{{ route('dashboard') }}" class="space-y-6">
         <!-- Email Field -->
         <div class="space-y-2">
             <label
@@ -69,7 +69,7 @@
         <p class="text-on-surface-variant text-sm">
             Belum memiliki akun?
             <a class="text-primary font-semibold hover:underline decoration-primary/30 underline-offset-4 ml-1"
-                href="/register">Daftar Sekarang</a>
+                href="{{ route('register') }}">Daftar Sekarang</a>
         </p>
     </div>
 </x-guest-layout>
