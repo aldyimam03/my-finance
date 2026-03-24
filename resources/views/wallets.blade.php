@@ -12,10 +12,10 @@
             </div>
             <p class="text-on-surface-variant/60 mt-4 font-['Inter'] text-sm max-w-md">Kalkulasi total aset bersih Anda di seluruh instrumen keuangan per hari ini.</p>
         </div>
-        <button class="px-6 py-4 bg-linear-to-br from-primary to-primary-container text-on-primary font-bold rounded-xl flex items-center gap-3 shadow-xl shadow-primary/10 hover:opacity-90 active:scale-[0.98] transition-all shrink-0">
+        <a href="{{ route('wallets.create') }}" class="px-6 py-4 bg-linear-to-br from-primary to-primary-container text-on-primary-container font-bold rounded-xl flex items-center gap-3 shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0">
             <span class="material-symbols-outlined" data-icon="add_card">add_card</span>
             Tambah Dompet Baru
-        </button>
+        </a>
     </section>
 
     <!-- Bento Grid Layout -->

@@ -22,6 +22,10 @@ Route::get('/wallets', function () {
     return view('wallets');
 })->name('wallets');
 
+Route::get('/wallets/create', function () {
+    return view('create-wallet');
+})->name('wallets.create');
+
 Route::get('/budgets', function () {
     return view('budgets');
 })->name('budgets');
