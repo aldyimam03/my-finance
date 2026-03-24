@@ -4,7 +4,8 @@
         <p class="text-on-surface-variant body-md">Silakan masuk ke akun Obsidian Ledger Anda.</p>
     </div>
     
-    <form action="{{ route('dashboard') }}" class="space-y-6">
+    <form action="/login" method="POST" class="space-y-6">
+        @csrf
         <!-- Email Field -->
         <div class="space-y-2">
             <label
@@ -12,9 +13,12 @@
                 for="email">Alamat Email</label>
             <div class="relative">
                 <input
-                    class="w-full bg-surface-container-lowest border-none ring-1 ring-outline-variant/30 rounded-xl px-4 py-4 text-on-surface focus:ring-primary/50 transition-all outline-none placeholder:text-on-surface-variant/30"
-                    id="email" placeholder="nama@email.com" type="email" />
+                    class="w-full bg-surface-container-lowest border-none ring-1 ring-outline-variant/30 rounded-xl px-4 py-4 text-on-surface focus:ring-primary/50 transition-all outline-none placeholder:text-on-surface-variant/30 @error('email') ring-red-500/50 focus:ring-red-500/50 @enderror"
+                    id="email" name="email" value="{{ old('email', request()->cookie('remember_email')) }}" placeholder="nama@email.com" type="email" required autofocus />
             </div>
+            @error('email')
+                <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
+            @enderror
         </div>
         
         <!-- Password Field -->
@@ -24,33 +28,34 @@
                     class="block text-[11px] uppercase tracking-[0.05em] text-on-surface-variant font-medium ml-1"
                     for="password">Kata Sandi</label>
             </div>
-            <div class="relative group">
+            <div class="relative group" x-data="{ show: false }">
                 <input
-                    class="w-full bg-surface-container-lowest border-none ring-1 ring-outline-variant/30 rounded-xl px-4 py-4 text-on-surface focus:ring-primary/50 transition-all outline-none placeholder:text-on-surface-variant/30"
-                    id="password" placeholder="••••••••" type="password" />
+                    class="w-full bg-surface-container-lowest border-none ring-1 ring-outline-variant/30 rounded-xl px-4 py-4 text-on-surface focus:ring-primary/50 transition-all outline-none placeholder:text-on-surface-variant/30 @error('password') ring-red-500/50 focus:ring-red-500/50 @enderror"
+                    id="password" name="password" placeholder="••••••••" :type="show ? 'text' : 'password'" required />
                 <button
                     class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors"
-                    type="button">
-                    <span class="material-symbols-outlined text-xl" data-icon="visibility">visibility</span>
+                    type="button" @click="show = !show">
+                    <span class="material-symbols-outlined text-xl" x-text="show ? 'visibility_off' : 'visibility'">visibility</span>
                 </button>
             </div>
+            @error('password')
+                <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
+            @enderror
         </div>
         
         <!-- Options -->
         <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2 group cursor-pointer">
-                <div class="relative flex items-center">
+            <label class="flex items-center gap-2 group cursor-pointer" for="remember">
+                <div class="relative flex items-center w-5 h-5">
                     <input
                         class="peer appearance-none w-5 h-5 rounded border border-outline-variant bg-transparent checked:bg-primary checked:border-primary transition-all cursor-pointer"
-                        id="remember" type="checkbox" />
+                        id="remember" name="remember" type="checkbox" value="1" {{ request()->hasCookie('remember_email') ? 'checked' : '' }} />
                     <span
                         class="material-symbols-outlined absolute text-[14px] text-on-primary opacity-0 peer-checked:opacity-100 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                         data-icon="check">check</span>
                 </div>
-                <label
-                    class="text-sm text-on-surface-variant group-hover:text-on-surface transition-colors cursor-pointer"
-                    for="remember">Ingat Saya</label>
-            </div>
+                <span class="text-sm text-on-surface-variant group-hover:text-on-surface transition-colors">Ingat Saya</span>
+            </label>
             <a class="text-sm text-primary hover:text-primary-container transition-colors font-medium"
                 href="#">Lupa Kata Sandi?</a>
         </div>

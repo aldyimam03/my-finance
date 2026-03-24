@@ -50,10 +50,13 @@
                 <span class="material-symbols-outlined {{ request()->routeIs('settings') ? '[font-variation-settings:\'FILL\'_1]' : '' }}" data-icon="settings">settings</span>
                 <span class="text-[14px]">Pengaturan</span>
             </a>
-            <a class="flex items-center gap-3 px-4 py-2 text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5 transition-all duration-200" href="{{ route('login') }}">
-                <span class="material-symbols-outlined" data-icon="logout">logout</span>
-                <span class="text-[14px]">Keluar</span>
-            </a>
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="w-full flex items-center gap-3 px-4 py-2 text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5 transition-all duration-200 text-left cursor-pointer">
+                    <span class="material-symbols-outlined" data-icon="logout">logout</span>
+                    <span class="text-[14px]">Keluar</span>
+                </button>
+            </form>
         </div>
     </aside>
 
@@ -70,10 +73,10 @@
             </button>
             <div class="flex items-center gap-3 pl-6 border-l border-white/10">
                 <div class="text-right">
-                    <p class="text-xs font-semibold">Adrian Wijaya</p>
-                    <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Premium Member</p>
+                    <p class="text-xs font-semibold">{{ Auth::user()->name ?? 'Guest' }}</p>
+                    <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">{{ Auth::user()->email ?? 'guest@example.com' }}</p>
                 </div>
-                <img alt="User Profile Avatar" class="w-8 h-8 rounded-full object-cover ring-1 ring-primary/20" data-alt="Close up portrait of a smiling man with professional lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZHjWC50aPjFa95O-fkHF69vzKeqsxBHVke7wV5LxAxggZXvdRu5GRyqOXp0xbinbQYI13d8MuI2AR2QGizpQHYgNKi0LE9EO1hY-JKdSiKm9iT3p4xXhj2MvOVG39hZp7CL11IoG4iSMXfYqozHmdeI59sbykYm1FdKmMmRwFsWOAxt0CaTORmei53cghv0rhwiCYUXex5nFFH2l7QeBtChDXHX-gwyazE9P8FswfWJlLLHqx6Bl9uSBl69qmUIBQmaptB6XSaoY" />
+                <img alt="User Profile Avatar" class="w-8 h-8 rounded-full object-cover ring-1 ring-primary/20" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'Guest') }}&background=2C3E50&color=FFFFFF" />
             </div>
         </div>
     </header>
