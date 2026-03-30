@@ -21,14 +21,14 @@
             </a>
             <span class="text-xl font-bold tracking-tighter text-[#e5e2e1] hidden sm:block">My Finance</span>
         </div>
-        <div class="flex items-center gap-6">
-            <button class="relative text-[#e5e2e1]/80 hover:text-white transition-colors">
-                <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
-                <span class="absolute top-0 right-0 w-2 h-2 bg-tertiary-container rounded-full border-2 border-surface-container-low hidden"></span>
-            </button>
-            <div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden ring-1 ring-primary/20">
-                <img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZHjWC50aPjFa95O-fkHF69vzKeqsxBHVke7wV5LxAxggZXvdRu5GRyqOXp0xbinbQYI13d8MuI2AR2QGizpQHYgNKi0LE9EO1hY-JKdSiKm9iT3p4xXhj2MvOVG39hZp7CL11IoG4iSMXfYqozHmdeI59sbykYm1FdKmMmRwFsWOAxt0CaTORmei53cghv0rhwiCYUXex5nFFH2l7QeBtChDXHX-gwyazE9P8FswfWJlLLHqx6Bl9uSBl69qmUIBQmaptB6XSaoY" />
+        <div class="flex items-center gap-4">
+            <div class="text-right hidden sm:block">
+                <p class="text-xs font-semibold text-[#e5e2e1]">{{ Auth::user()->name ?? 'Guest' }}</p>
+                <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">{{ Auth::user()->email ?? '' }}</p>
             </div>
+            <img alt="User profile avatar"
+                class="w-8 h-8 rounded-full object-cover ring-1 ring-primary/20"
+                src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'User') }}&background=2C3E50&color=FFFFFF" />
         </div>
     </nav>
 

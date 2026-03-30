@@ -1,28 +1,36 @@
 <x-focus-layout title="Tambah Dompet Baru - My Finance" back-url="{{ route('wallets') }}">
-    <main class="pt-32 pb-20 px-4 sm:px-8 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 relative z-10" x-data="{ walletName: '', balance: '', type: 'Bank', colorClass: 'bg-primary' }">
+    <main class="pt-32 pb-20 px-4 sm:px-8 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 relative z-10" x-data="{ walletName: '', balance: '', type: 'Bank', colorClass: 'bg-primary', icon: 'account_balance_wallet' }">
         <!-- Left Content: Form Section -->
-        <div class="lg:col-span-7 space-y-12">
+        <form action="{{ route('wallets.store') }}" method="POST" class="lg:col-span-7 space-y-12">
+            @csrf
             <!-- Header -->
             <header class="space-y-2">
                 <h1 class="text-4xl sm:text-5xl font-semibold tracking-tight text-on-surface leading-tight">Tambah Dompet Baru</h1>
                 <p class="text-on-surface-variant font-medium tracking-wide opacity-80 uppercase text-xs">Sesuaikan identitas finansial Anda</p>
             </header>
 
+            @if ($errors->any())
+            <div class="bg-tertiary-container/10 border border-tertiary-container/20 p-4 rounded-xl">
+                <ul class="list-disc list-inside text-xs text-tertiary-container">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
             <section class="space-y-10">
                 <!-- Basic Info Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="flex flex-col gap-2">
                         <label class="text-[0.6875rem] font-medium uppercase tracking-widest text-on-surface-variant">Nama Dompet</label>
-                        <input x-model="walletName" class="bg-surface-container-lowest border border-white/5 rounded-xl px-4 py-3 focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all text-on-surface placeholder:text-on-surface-variant/30 outline-none w-full" placeholder="Contoh: Tabungan Utama" type="text" />
+                        <input name="name" x-model="walletName" class="bg-surface-container-lowest border border-white/5 rounded-xl px-4 py-3 focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all text-on-surface placeholder:text-on-surface-variant/30 outline-none w-full" placeholder="Contoh: Tabungan Utama" type="text" required />
                     </div>
                     <div class="flex flex-col gap-2">
                         <label class="text-[0.6875rem] font-medium uppercase tracking-widest text-on-surface-variant">Mata Uang Utama</label>
                         <div class="relative">
-                            <select class="w-full bg-surface-container-lowest border border-white/5 rounded-xl px-4 py-3 focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all text-on-surface appearance-none outline-none cursor-pointer">
-                                <option class="bg-surface-container">IDR - Indonesian Rupiah</option>
-                                <option class="bg-surface-container">USD - US Dollar</option>
-                                <option class="bg-surface-container">EUR - Euro</option>
-                                <option class="bg-surface-container">BTC - Bitcoin</option>
+                            <select name="currency" class="w-full bg-surface-container-lowest border border-white/5 rounded-xl px-4 py-3 focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all text-on-surface appearance-none outline-none cursor-pointer">
+                                <option value="IDR" class="bg-surface-container">IDR - Indonesian Rupiah</option>
                             </select>
                             <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm border-none bg-transparent">expand_more</span>
                         </div>
@@ -32,24 +40,25 @@
                 <!-- Tipe Akun Selection -->
                 <div class="space-y-4">
                     <label class="text-[0.6875rem] font-medium uppercase tracking-widest text-on-surface-variant">Tipe Akun</label>
+                    <input type="hidden" name="type" x-model="type">
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                        <button @click="type = 'Bank'" :class="type === 'Bank' ? 'border-primary/40 bg-primary/10' : 'bg-surface-container-low/40 backdrop-blur-md border border-white/5 hover:bg-white/10'" class="p-4 rounded-xl flex flex-col items-center gap-2 transition-all active:scale-95 group">
+                        <button type="button" @click="type = 'Bank'" :class="type === 'Bank' ? 'border-primary/40 bg-primary/10' : 'bg-surface-container-low/40 backdrop-blur-md border border-white/5 hover:bg-white/10'" class="p-4 rounded-xl flex flex-col items-center gap-2 transition-all active:scale-95 group">
                             <span class="material-symbols-outlined transition-colors" :class="type === 'Bank' ? 'text-primary' : 'text-on-surface/40 group-hover:text-on-surface'" :style="type === 'Bank' ? 'font-variation-settings: \'FILL\' 1;' : ''">account_balance</span>
                             <span class="text-[0.75rem] font-medium transition-colors" :class="type === 'Bank' ? 'text-on-surface' : 'text-on-surface/60 group-hover:text-on-surface'">Bank</span>
                         </button>
-                        <button @click="type = 'E-Wallet'" :class="type === 'E-Wallet' ? 'border-primary/40 bg-primary/10' : 'bg-surface-container-low/40 backdrop-blur-md border border-white/5 hover:bg-white/10'" class="p-4 rounded-xl flex flex-col items-center gap-2 transition-all active:scale-95 group">
+                        <button type="button" @click="type = 'E-Wallet'" :class="type === 'E-Wallet' ? 'border-primary/40 bg-primary/10' : 'bg-surface-container-low/40 backdrop-blur-md border border-white/5 hover:bg-white/10'" class="p-4 rounded-xl flex flex-col items-center gap-2 transition-all active:scale-95 group">
                             <span class="material-symbols-outlined transition-colors" :class="type === 'E-Wallet' ? 'text-primary' : 'text-on-surface/40 group-hover:text-on-surface'" :style="type === 'E-Wallet' ? 'font-variation-settings: \'FILL\' 1;' : ''">account_balance_wallet</span>
                             <span class="text-[0.75rem] font-medium transition-colors" :class="type === 'E-Wallet' ? 'text-on-surface' : 'text-on-surface/60 group-hover:text-on-surface'">E-Wallet</span>
                         </button>
-                        <button @click="type = 'Investasi'" :class="type === 'Investasi' ? 'border-primary/40 bg-primary/10' : 'bg-surface-container-low/40 backdrop-blur-md border border-white/5 hover:bg-white/10'" class="p-4 rounded-xl flex flex-col items-center gap-2 transition-all active:scale-95 group">
+                        <button type="button" @click="type = 'Investasi'" :class="type === 'Investasi' ? 'border-primary/40 bg-primary/10' : 'bg-surface-container-low/40 backdrop-blur-md border border-white/5 hover:bg-white/10'" class="p-4 rounded-xl flex flex-col items-center gap-2 transition-all active:scale-95 group">
                             <span class="material-symbols-outlined transition-colors" :class="type === 'Investasi' ? 'text-primary' : 'text-on-surface/40 group-hover:text-on-surface'" :style="type === 'Investasi' ? 'font-variation-settings: \'FILL\' 1;' : ''">trending_up</span>
                             <span class="text-[0.75rem] font-medium transition-colors" :class="type === 'Investasi' ? 'text-on-surface' : 'text-on-surface/60 group-hover:text-on-surface'">Investasi</span>
                         </button>
-                        <button @click="type = 'Tunai'" :class="type === 'Tunai' ? 'border-primary/40 bg-primary/10' : 'bg-surface-container-low/40 backdrop-blur-md border border-white/5 hover:bg-white/10'" class="p-4 rounded-xl flex flex-col items-center gap-2 transition-all active:scale-95 group">
+                        <button type="button" @click="type = 'Tunai'" :class="type === 'Tunai' ? 'border-primary/40 bg-primary/10' : 'bg-surface-container-low/40 backdrop-blur-md border border-white/5 hover:bg-white/10'" class="p-4 rounded-xl flex flex-col items-center gap-2 transition-all active:scale-95 group">
                             <span class="material-symbols-outlined transition-colors" :class="type === 'Tunai' ? 'text-primary' : 'text-on-surface/40 group-hover:text-on-surface'" :style="type === 'Tunai' ? 'font-variation-settings: \'FILL\' 1;' : ''">payments</span>
                             <span class="text-[0.75rem] font-medium transition-colors" :class="type === 'Tunai' ? 'text-on-surface' : 'text-on-surface/60 group-hover:text-on-surface'">Tunai</span>
                         </button>
-                        <button @click="type = 'Kripto'" :class="type === 'Kripto' ? 'border-primary/40 bg-primary/10' : 'bg-surface-container-low/40 backdrop-blur-md border border-white/5 hover:bg-white/10'" class="p-4 rounded-xl flex flex-col items-center gap-2 transition-all active:scale-95 group">
+                        <button type="button" @click="type = 'Kripto'" :class="type === 'Kripto' ? 'border-primary/40 bg-primary/10' : 'bg-surface-container-low/40 backdrop-blur-md border border-white/5 hover:bg-white/10'" class="p-4 rounded-xl flex flex-col items-center gap-2 transition-all active:scale-95 group">
                             <span class="material-symbols-outlined transition-colors" :class="type === 'Kripto' ? 'text-primary' : 'text-on-surface/40 group-hover:text-on-surface'" :style="type === 'Kripto' ? 'font-variation-settings: \'FILL\' 1;' : ''">currency_bitcoin</span>
                             <span class="text-[0.75rem] font-medium transition-colors" :class="type === 'Kripto' ? 'text-on-surface' : 'text-on-surface/60 group-hover:text-on-surface'">Kripto</span>
                         </button>
@@ -61,7 +70,7 @@
                     <label class="text-[0.6875rem] font-medium uppercase tracking-widest text-on-surface-variant">Saldo Awal</label>
                     <div class="relative group">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-lg pointer-events-none">Rp</span>
-                        <input x-model="balance" class="w-full bg-surface-container-lowest border border-white/5 rounded-xl pl-14 pr-4 py-4 text-2xl font-bold tracking-tight focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all text-on-surface outline-none placeholder:text-surface-container-highest" placeholder="0" type="number" />
+                        <input name="balance" x-model="balance" class="w-full bg-surface-container-lowest border border-white/5 rounded-xl pl-14 pr-4 py-4 text-2xl font-bold tracking-tight focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all text-on-surface outline-none placeholder:text-surface-container-highest" placeholder="0" type="number" required />
                     </div>
                 </div>
 
@@ -70,47 +79,24 @@
                     <!-- Icon Grid -->
                     <div class="space-y-4">
                         <label class="text-[0.6875rem] font-medium uppercase tracking-widest text-on-surface-variant">Pilih Ikon</label>
+                        <input type="hidden" name="icon" x-model="icon">
                         <div class="grid grid-cols-4 gap-3">
-                            <button class="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 hover:bg-primary/20 text-on-surface/60 hover:text-primary transition-all">
-                                <span class="material-symbols-outlined">savings</span>
+                            @foreach(['savings', 'credit_card', 'apartment', 'shopping_bag', 'flight', 'fastfood', 'directions_car', 'account_balance_wallet'] as $iconName)
+                            <button type="button" @click="icon = '{{ $iconName }}'" :class="icon === '{{ $iconName }}' ? 'bg-primary/20 text-primary border-primary/30' : 'bg-white/5 text-on-surface/60 hover:bg-primary/20 hover:text-primary'" class="w-12 h-12 rounded-full flex items-center justify-center transition-all border border-transparent">
+                                <span class="material-symbols-outlined">{{ $iconName }}</span>
                             </button>
-                            <button class="w-12 h-12 rounded-full flex items-center justify-center bg-primary/20 text-primary border border-primary/30 transition-all">
-                                <span class="material-symbols-outlined">credit_card</span>
-                            </button>
-                            <button class="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 hover:bg-primary/20 text-on-surface/60 hover:text-primary transition-all">
-                                <span class="material-symbols-outlined">apartment</span>
-                            </button>
-                            <button class="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 hover:bg-primary/20 text-on-surface/60 hover:text-primary transition-all">
-                                <span class="material-symbols-outlined">shopping_bag</span>
-                            </button>
-                            <button class="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 hover:bg-primary/20 text-on-surface/60 hover:text-primary transition-all">
-                                <span class="material-symbols-outlined">flight</span>
-                            </button>
-                            <button class="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 hover:bg-primary/20 text-on-surface/60 hover:text-primary transition-all">
-                                <span class="material-symbols-outlined">fastfood</span>
-                            </button>
-                            <button class="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 hover:bg-primary/20 text-on-surface/60 hover:text-primary transition-all">
-                                <span class="material-symbols-outlined">directions_car</span>
-                            </button>
-                            <button class="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 hover:bg-primary/20 text-on-surface/60 hover:text-primary transition-all">
-                                <span class="material-symbols-outlined">more_horiz</span>
-                            </button>
+                            @endforeach
                         </div>
                     </div>
 
                     <!-- Color Swatches -->
                     <div class="space-y-4">
                         <label class="text-[0.6875rem] font-medium uppercase tracking-widest text-on-surface-variant">Warna Aksen</label>
+                        <input type="hidden" name="color" x-model="colorClass">
                         <div class="grid grid-cols-4 gap-4">
-                            <!-- A few curated colors matching the app palette -->
-                            <button @click="colorClass = 'bg-primary'" :class="colorClass === 'bg-primary' ? 'ring-4 ring-primary/40 ring-offset-4 ring-offset-surface scale-110' : 'hover:scale-110'" class="w-10 h-10 rounded-full bg-primary transition-all"></button>
-                            <button @click="colorClass = 'bg-secondary'" :class="colorClass === 'bg-secondary' ? 'ring-4 ring-secondary/40 ring-offset-4 ring-offset-surface scale-110' : 'hover:scale-110'" class="w-10 h-10 rounded-full bg-secondary transition-all"></button>
-                            <button @click="colorClass = 'bg-tertiary-container'" :class="colorClass === 'bg-tertiary-container' ? 'ring-4 ring-tertiary-container/40 ring-offset-4 ring-offset-surface scale-110' : 'hover:scale-110'" class="w-10 h-10 rounded-full bg-tertiary-container transition-all"></button>
-                            <button @click="colorClass = 'bg-amber-400'" :class="colorClass === 'bg-amber-400' ? 'ring-4 ring-amber-400/40 ring-offset-4 ring-offset-surface scale-110' : 'hover:scale-110'" class="w-10 h-10 rounded-full bg-amber-400 transition-all"></button>
-                            <button @click="colorClass = 'bg-indigo-500'" :class="colorClass === 'bg-indigo-500' ? 'ring-4 ring-indigo-500/40 ring-offset-4 ring-offset-surface scale-110' : 'hover:scale-110'" class="w-10 h-10 rounded-full bg-indigo-500 transition-all"></button>
-                            <button @click="colorClass = 'bg-fuchsia-500'" :class="colorClass === 'bg-fuchsia-500' ? 'ring-4 ring-fuchsia-500/40 ring-offset-4 ring-offset-surface scale-110' : 'hover:scale-110'" class="w-10 h-10 rounded-full bg-fuchsia-500 transition-all"></button>
-                            <button @click="colorClass = 'bg-rose-500'" :class="colorClass === 'bg-rose-500' ? 'ring-4 ring-rose-500/40 ring-offset-4 ring-offset-surface scale-110' : 'hover:scale-110'" class="w-10 h-10 rounded-full bg-rose-500 transition-all"></button>
-                            <button @click="colorClass = 'bg-slate-400'" :class="colorClass === 'bg-slate-400' ? 'ring-4 ring-slate-400/40 ring-offset-4 ring-offset-surface scale-110' : 'hover:scale-110'" class="w-10 h-10 rounded-full bg-slate-400 transition-all"></button>
+                            @foreach(['bg-primary', 'bg-secondary', 'bg-tertiary-container', 'bg-amber-400', 'bg-indigo-500', 'bg-fuchsia-500', 'bg-rose-500', 'bg-slate-400'] as $color)
+                            <button type="button" @click="colorClass = '{{ $color }}'" :class="colorClass === '{{ $color }}' ? 'ring-4 ring-offset-4 ring-offset-surface scale-110' : 'hover:scale-110'" class="w-10 h-10 rounded-full {{ $color }} transition-all" style="{{ $color === 'bg-primary' ? 'ring-color: var(--primary);' : '' }}"></button>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -118,14 +104,14 @@
 
             <!-- Action Buttons -->
             <footer class="flex items-center gap-6 pt-12">
-                <button class="px-10 py-4 bg-linear-to-br from-primary to-primary-container text-on-primary-container font-bold tracking-wide rounded-xl hover:scale-[1.02] transition-all active:scale-95 shadow-xl shadow-primary/20">
+                <button type="submit" class="px-10 py-4 bg-linear-to-br from-primary to-primary-container text-on-primary-container font-bold tracking-wide rounded-xl hover:scale-[1.02] transition-all active:scale-95 shadow-xl shadow-primary/20">
                     Simpan Dompet
                 </button>
                 <a href="{{ route('wallets') }}" class="px-8 py-4 text-on-surface-variant font-medium hover:text-white hover:bg-surface-container-highest border border-transparent rounded-xl transition-all">
                     Batal
                 </a>
             </footer>
-        </div>
+        </form>
 
         <!-- Right Content: Real-time Preview Card -->
         <div class="lg:col-span-5 relative mt-8 lg:mt-0">
