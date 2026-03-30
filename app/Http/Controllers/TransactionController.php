@@ -1,0 +1,86 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Transaction;
+use App\Models\Wallet;
+use App\Models\Category;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+class TransactionController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = Auth::user()->transactions()->with(['wallet', 'category', 'toWallet']);
+
+        if ($request->has('type') && $request->type != 'all') {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->has('wallet_id') && $request->wallet_id != 'all') {
+            $query->where('wallet_id', $request->wallet_id);
+        }
+
+        $transactions = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->paginate(15);
+        $wallets = Auth::user()->wallets()->get();
+        $categories = Auth::user()->categories()->get();
+
+        return view('transactions', compact('transactions', 'wallets', 'categories'));
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'wallet_id' => 'required|exists:wallets,id',
+            'category_id' => 'nullable|exists:categories,id',
+            'to_wallet_id' => 'required_if:type,transfer|nullable|exists:wallets,id',
+            'type' => 'required|in:income,expense,transfer',
+            'amount' => 'required|numeric|min:0.01',
+            'description' => 'nullable|string|max:255',
+            'date' => 'required|date',
+        ]);
+
+        $wallet = Auth::user()->wallets()->findOrFail($validated['wallet_id']);
+
+        DB::transaction(function () use ($validated, $wallet) {
+            $transaction = Auth::user()->transactions()->create($validated);
+
+            if ($validated['type'] === 'income') {
+                $wallet->increment('balance', $validated['amount']);
+            } elseif ($validated['type'] === 'expense') {
+                $wallet->decrement('balance', $validated['amount']);
+            } elseif ($validated['type'] === 'transfer') {
+                $toWallet = Auth::user()->wallets()->findOrFail($validated['to_wallet_id']);
+                $wallet->decrement('balance', $validated['amount']);
+                $toWallet->increment('balance', $validated['amount']);
+            }
+        });
+
+        return redirect()->back()->with('success', 'Transaksi berhasil dicatat.');
+    }
+
+    public function destroy(Transaction $transaction)
+    {
+        $this->authorize('delete', $transaction);
+
+        DB::transaction(function () use ($transaction) {
+            $wallet = $transaction->wallet;
+
+            if ($transaction->type === 'income') {
+                $wallet->decrement('balance', $transaction->amount);
+            } elseif ($transaction->type === 'expense') {
+                $wallet->increment('balance', $transaction->amount);
+            } elseif ($transaction->type === 'transfer') {
+                $toWallet = $transaction->toWallet;
+                $wallet->increment('balance', $transaction->amount);
+                $toWallet->decrement('balance', $transaction->amount);
+            }
+
+            $transaction->delete();
+        });
+
+        return redirect()->back()->with('success', 'Transaksi berhasil dihapus.');
+    }
+}

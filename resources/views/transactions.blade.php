@@ -1,68 +1,195 @@
 <x-app-layout title="Transaksi - My Finance">
+    @if(session('success'))
+    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
+        class="fixed top-6 right-6 z-[100] bg-secondary/20 border border-secondary/30 text-secondary px-6 py-4 rounded-2xl shadow-xl backdrop-blur-md text-sm font-semibold flex items-center gap-3">
+        <span class="material-symbols-outlined text-lg">check_circle</span>
+        {{ session('success') }}
+    </div>
+    @endif
+
     <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12"
+        x-data="{
+            showModal: false,
+            type: 'expense',
+            wallets: {{ $wallets->toJson() }},
+            categories: {{ $categories->toJson() }}
+        }">
         <div>
             <span class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant block mb-2">Manajemen Keuangan</span>
             <h2 class="font-['Inter'] text-3xl font-bold tracking-tight text-on-surface">Daftar Transaksi</h2>
         </div>
-        <div class="flex gap-4">
+        <div class="flex gap-4 items-center">
             <div class="bg-surface-container-low px-8 py-4 rounded-xl shadow-lg border border-white/5 min-w-[200px]">
                 <span class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-secondary/70 block mb-1">Total Pemasukan</span>
                 <div class="flex items-baseline gap-1">
                     <span class="text-xs text-secondary/60">Rp</span>
-                    <span class="text-2xl font-bold text-secondary">42.500.000</span>
+                    <span class="text-2xl font-bold text-secondary">{{ number_format(auth()->user()->transactions()->where('type','income')->whereMonth('date', now()->month)->sum('amount'), 0, ',', '.') }}</span>
                 </div>
             </div>
             <div class="bg-surface-container-low px-8 py-4 rounded-xl shadow-lg border border-white/5 min-w-[200px]">
-                <span class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-tertiary/70 block mb-1">Total Pengeluaran</span>
+                <span class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-tertiary-container/70 block mb-1">Total Pengeluaran</span>
                 <div class="flex items-baseline gap-1">
-                    <span class="text-xs text-tertiary/60">Rp</span>
-                    <span class="text-2xl font-bold text-tertiary">12.840.200</span>
+                    <span class="text-xs text-tertiary-container/60">Rp</span>
+                    <span class="text-2xl font-bold text-tertiary-container">{{ number_format(auth()->user()->transactions()->where('type','expense')->whereMonth('date', now()->month)->sum('amount'), 0, ',', '.') }}</span>
                 </div>
             </div>
+            <button @click="showModal = true"
+                class="px-6 py-4 bg-primary text-on-primary font-bold rounded-xl flex items-center gap-3 shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap">
+                <span class="material-symbols-outlined">add</span>
+                Tambah Transaksi
+            </button>
         </div>
-    </div>
-    
-    <!-- Filter Section -->
-    <section class="mb-12">
-        <div class="bg-surface-container-low p-6 rounded-xl border border-white/5 shadow-xl flex flex-wrap items-center gap-6">
-            <div class="flex-1 min-w-[200px]">
-                <label class="block font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant mb-2 ml-1">Rentang Waktu</label>
-                <select class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg py-2.5 px-4 text-on-surface font-body text-sm focus:border-primary/50 transition-colors outline-none">
-                    <option>Bulan Ini</option>
-                    <option>Minggu Ini</option>
-                    <option>3 Bulan Terakhir</option>
-                    <option>Tahun Ini</option>
-                    <option>Custom</option>
-                </select>
-            </div>
-            <div class="flex-1 min-w-[200px]">
-                <label class="block font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant mb-2 ml-1">Kategori</label>
-                <select class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg py-2.5 px-4 text-on-surface font-body text-sm focus:border-primary/50 transition-colors outline-none">
-                    <option>Semua Kategori</option>
-                    <option>Makanan &amp; Minuman</option>
-                    <option>Transportasi</option>
-                    <option>Hiburan</option>
-                    <option>Belanja</option>
-                </select>
-            </div>
-            <div class="flex-1 min-w-[200px]">
-                <label class="block font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant mb-2 ml-1">Tipe</label>
-                <div class="flex bg-surface-container-lowest p-1 rounded-lg border border-outline-variant/30">
-                    <button class="flex-1 py-1.5 text-xs font-semibold rounded-md bg-primary text-on-primary shadow-sm hover:opacity-90 transition-opacity">Semua</button>
-                    <button class="flex-1 py-1.5 text-xs font-semibold rounded-md text-on-surface-variant hover:text-on-surface transition-colors">Masuk</button>
-                    <button class="flex-1 py-1.5 text-xs font-semibold rounded-md text-on-surface-variant hover:text-on-surface transition-colors">Keluar</button>
+
+        <!-- Add Transaction Modal -->
+        <template x-teleport="body">
+            <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0">
+                <!-- Backdrop -->
+                <div class="absolute inset-0 bg-surface/80 backdrop-blur-xl" @click="showModal = false"></div>
+
+                <!-- Modal Content -->
+                <div class="relative bg-surface-container-low border border-white/10 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    @click.stop>
+                    <form action="{{ route('transactions.store') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="type" x-model="type">
+
+                        <div class="px-8 py-6 border-b border-white/5 flex justify-between items-center">
+                            <h3 class="text-xl font-semibold">Catat Transaksi</h3>
+                            <button type="button" @click="showModal = false" class="text-on-surface-variant hover:text-on-surface transition-colors">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+
+                        <div class="p-8 space-y-6">
+                            <!-- Type Toggle -->
+                            <div class="flex p-1 bg-surface-container-high rounded-xl border border-white/5">
+                                <button type="button" @click="type = 'expense'"
+                                    :class="type === 'expense' ? 'bg-tertiary-container text-on-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+                                    class="flex-1 py-3 rounded-lg text-xs uppercase tracking-widest transition-all">
+                                    Pengeluaran
+                                </button>
+                                <button type="button" @click="type = 'income'"
+                                    :class="type === 'income' ? 'bg-secondary text-on-secondary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+                                    class="flex-1 py-3 rounded-lg text-xs uppercase tracking-widest transition-all">
+                                    Pemasukan
+                                </button>
+                            </div>
+
+                            <!-- Amount -->
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Jumlah</label>
+                                <div class="relative">
+                                    <span class="absolute left-5 top-1/2 -translate-y-1/2 text-xl font-bold text-on-surface-variant">Rp</span>
+                                    <input name="amount" type="number" step="1" min="1"
+                                        class="w-full bg-surface-container-highest border-none rounded-2xl pl-14 pr-6 py-5 text-3xl font-bold tracking-tight text-on-surface focus:ring-2 focus:ring-primary/30 outline-none placeholder:text-on-surface-variant/20"
+                                        placeholder="0" required>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <!-- Wallet -->
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Dompet</label>
+                                    <div class="relative">
+                                        <select name="wallet_id" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface appearance-none outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer" required>
+                                            <template x-for="wallet in wallets" :key="wallet.id">
+                                                <option :value="wallet.id" x-text="wallet.name"></option>
+                                            </template>
+                                        </select>
+                                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm">expand_more</span>
+                                    </div>
+                                </div>
+                                <!-- Category -->
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Kategori</label>
+                                    <div class="relative">
+                                        <select name="category_id" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface appearance-none outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer" required>
+                                            <template x-for="cat in categories" :key="cat.id">
+                                                <option :value="cat.id" x-text="cat.name"></option>
+                                            </template>
+                                        </select>
+                                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm">expand_more</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Deskripsi</label>
+                                <input name="description" type="text"
+                                    class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none placeholder:text-on-surface-variant/30"
+                                    placeholder="Untuk apa pengeluaran ini?">
+                            </div>
+
+                            <!-- Date -->
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Tanggal</label>
+                                <input name="date" type="date" value="{{ date('Y-m-d') }}"
+                                    class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none" required>
+                            </div>
+                        </div>
+
+                        <div class="px-8 py-5 bg-surface-container-high/50 border-t border-white/5 flex gap-3">
+                            <button type="submit"
+                                class="flex-1 py-4 bg-primary text-on-primary font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                                Simpan
+                            </button>
+                            <button type="button" @click="showModal = false"
+                                class="px-6 py-4 text-on-surface-variant font-medium hover:bg-white/5 rounded-xl transition-all">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-            <div class="pt-6">
-                <button class="flex items-center gap-2 px-6 py-2.5 border border-primary text-primary hover:bg-primary/10 transition-all rounded-lg font-['Inter'] text-[11px] uppercase tracking-[0.05em] font-semibold active:scale-95">
-                    <span class="material-symbols-outlined text-sm" data-icon="download">download</span>
-                    Ekspor Laporan
-                </button>
-            </div>
+        </template>
+    </div>
+
+    <!-- Filter Section -->
+    <section class="mb-8">
+        <div class="bg-surface-container-low p-5 rounded-xl border border-white/5 shadow-xl flex flex-wrap items-center gap-4">
+            <form method="GET" action="{{ route('transactions') }}" class="flex flex-wrap gap-4 items-end w-full">
+                <div class="flex-1 min-w-[180px]">
+                    <label class="block font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant mb-2">Filter Tipe</label>
+                    <div class="flex bg-surface-container-lowest p-1 rounded-lg border border-white/10">
+                        <button type="submit" name="type" value="all"
+                            class="flex-1 py-1.5 text-xs font-semibold rounded-md transition-all {{ request('type', 'all') === 'all' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }}">
+                            Semua
+                        </button>
+                        <button type="submit" name="type" value="income"
+                            class="flex-1 py-1.5 text-xs font-semibold rounded-md transition-all {{ request('type') === 'income' ? 'bg-secondary text-on-secondary shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }}">
+                            Masuk
+                        </button>
+                        <button type="submit" name="type" value="expense"
+                            class="flex-1 py-1.5 text-xs font-semibold rounded-md transition-all {{ request('type') === 'expense' ? 'bg-tertiary-container text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }}">
+                            Keluar
+                        </button>
+                    </div>
+                </div>
+                <div class="flex-1 min-w-[180px]">
+                    <label class="block font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant mb-2">Dompet</label>
+                    <select name="wallet_id" onchange="this.form.submit()"
+                        class="w-full bg-surface-container-lowest border border-white/10 rounded-lg py-2.5 px-4 text-on-surface text-sm focus:border-primary/50 transition-colors outline-none">
+                        <option value="all">Semua Dompet</option>
+                        @foreach(auth()->user()->wallets as $w)
+                        <option value="{{ $w->id }}" {{ request('wallet_id') == $w->id ? 'selected' : '' }}>{{ $w->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </form>
         </div>
     </section>
-    
+
     <!-- Transaction Table Section -->
     <section>
         <div class="bg-surface-container-low rounded-xl border border-white/5 shadow-2xl overflow-hidden">
@@ -75,188 +202,117 @@
                             <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">Kategori</th>
                             <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">Dompet</th>
                             <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold text-right">Nominal</th>
+                            <th class="px-8 py-5"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/5">
-                        <!-- Row 1 -->
-                        <tr class="hover:bg-white/2 transition-colors group cursor-pointer">
-                            <td class="px-8 py-6 text-sm text-on-surface/80">14 Okt 2023</td>
-                            <td class="px-8 py-6">
+                        @forelse($transactions as $transaction)
+                        <tr class="hover:bg-white/5 transition-colors group cursor-pointer">
+                            <td class="px-8 py-5 text-sm text-on-surface/80 whitespace-nowrap">
+                                {{ $transaction->date->format('d M Y') }}
+                            </td>
+                            <td class="px-8 py-5">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-xl bg-surface-container-highest flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary/20 transition-all">
-                                        <span class="material-symbols-outlined" data-icon="coffee">coffee</span>
+                                    <div class="w-10 h-10 rounded-xl bg-surface-container-highest flex items-center justify-center {{ $transaction->type === 'income' ? 'text-secondary group-hover:bg-secondary/20' : 'text-primary group-hover:bg-primary/20' }} transition-all group-hover:scale-110">
+                                        <span class="material-symbols-outlined">{{ $transaction->category->icon ?? 'payments' }}</span>
                                     </div>
                                     <div>
-                                        <p class="text-sm font-semibold text-on-surface group-hover:text-primary transition-colors">Starbucks Reserve</p>
-                                        <p class="text-[10px] text-on-surface-variant">Kopi &amp; Sarapan</p>
+                                        <p class="text-sm font-semibold text-on-surface group-hover:text-primary transition-colors">
+                                            {{ $transaction->description ?? '—' }}
+                                        </p>
+                                        <p class="text-[10px] text-on-surface-variant capitalize">{{ $transaction->type }}</p>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-8 py-6">
-                                <span class="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold bg-surface-container-highest text-on-surface-variant">Makanan</span>
+                            <td class="px-8 py-5">
+                                <span class="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold
+                                    {{ $transaction->type === 'income' ? 'bg-secondary/10 text-secondary' : 'bg-surface-container-highest text-on-surface-variant' }}">
+                                    {{ $transaction->category->name ?? 'Tidak Ada' }}
+                                </span>
                             </td>
-                            <td class="px-8 py-6">
+                            <td class="px-8 py-5">
                                 <div class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(173,198,255,0.4)]"></span>
-                                    <span class="text-sm text-on-surface/80">Bank BCA</span>
+                                    <span class="w-2 h-2 rounded-full {{ $transaction->wallet->color ?? 'bg-primary' }} shadow-sm"></span>
+                                    <span class="text-sm text-on-surface/80">{{ $transaction->wallet->name }}</span>
                                 </div>
                             </td>
-                            <td class="px-8 py-6 text-right">
-                                <span class="text-sm font-bold text-tertiary">- 85.000</span>
+                            <td class="px-8 py-5 text-right">
+                                <span class="text-sm font-bold {{ $transaction->type === 'income' ? 'text-secondary' : 'text-tertiary-container' }}">
+                                    {{ $transaction->type === 'income' ? '+' : '-' }} Rp {{ number_format($transaction->amount, 0, ',', '.') }}
+                                </span>
+                            </td>
+                            <td class="px-8 py-5 text-right">
+                                <form action="{{ route('transactions.destroy', $transaction) }}" method="POST"
+                                    onsubmit="return confirm('Hapus transaksi ini? Saldo dompet akan dikembalikan.')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                        class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-tertiary-container/10 rounded-lg text-on-surface-variant/40 hover:text-tertiary-container">
+                                        <span class="material-symbols-outlined text-sm">delete</span>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
-                        <!-- Row 2 -->
-                        <tr class="hover:bg-white/2 transition-colors group cursor-pointer">
-                            <td class="px-8 py-6 text-sm text-on-surface/80">13 Okt 2023</td>
-                            <td class="px-8 py-6">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-xl bg-surface-container-highest flex items-center justify-center text-secondary group-hover:scale-110 group-hover:bg-secondary/20 transition-all">
-                                        <span class="material-symbols-outlined" data-icon="payments">payments</span>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-on-surface group-hover:text-secondary transition-colors">Gaji Bulanan</p>
-                                        <p class="text-[10px] text-on-surface-variant">PT. Teknologi Masa Depan</p>
-                                    </div>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="px-8 py-16 text-center">
+                                <div class="flex flex-col items-center gap-3">
+                                    <span class="material-symbols-outlined text-5xl text-on-surface-variant/20">receipt_long</span>
+                                    <p class="text-on-surface-variant/60 italic">Belum ada transaksi tercatat.</p>
                                 </div>
-                            </td>
-                            <td class="px-8 py-6">
-                                <span class="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold bg-secondary-container/20 text-secondary">Pendapatan</span>
-                            </td>
-                            <td class="px-8 py-6">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(173,198,255,0.4)]"></span>
-                                    <span class="text-sm text-on-surface/80">Bank BCA</span>
-                                </div>
-                            </td>
-                            <td class="px-8 py-6 text-right">
-                                <span class="text-sm font-bold text-secondary">+ 25.000.000</span>
                             </td>
                         </tr>
-                        <!-- Row 3 -->
-                        <tr class="hover:bg-white/2 transition-colors group cursor-pointer">
-                            <td class="px-8 py-6 text-sm text-on-surface/80">12 Okt 2023</td>
-                            <td class="px-8 py-6">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-xl bg-surface-container-highest flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary/20 transition-all">
-                                        <span class="material-symbols-outlined" data-icon="directions_car">directions_car</span>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-on-surface group-hover:text-primary transition-colors">Bensin Pertamax</p>
-                                        <p class="text-[10px] text-on-surface-variant">Pertamina Kuningan</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-8 py-6">
-                                <span class="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold bg-surface-container-highest text-on-surface-variant">Transport</span>
-                            </td>
-                            <td class="px-8 py-6">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_rgba(78,222,163,0.4)]"></span>
-                                    <span class="text-sm text-on-surface/80">E-Wallet</span>
-                                </div>
-                            </td>
-                            <td class="px-8 py-6 text-right">
-                                <span class="text-sm font-bold text-tertiary">- 450.000</span>
-                            </td>
-                        </tr>
-                        <!-- Row 4 -->
-                        <tr class="hover:bg-white/2 transition-colors group cursor-pointer">
-                            <td class="px-8 py-6 text-sm text-on-surface/80">10 Okt 2023</td>
-                            <td class="px-8 py-6">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-xl bg-surface-container-highest flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary/20 transition-all">
-                                        <span class="material-symbols-outlined" data-icon="shopping_bag">shopping_bag</span>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-on-surface group-hover:text-primary transition-colors">Uniqlo PIM 3</p>
-                                        <p class="text-[10px] text-on-surface-variant">Belanja Pakaian</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-8 py-6">
-                                <span class="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold bg-surface-container-highest text-on-surface-variant">Gaya Hidup</span>
-                            </td>
-                            <td class="px-8 py-6">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(173,198,255,0.4)]"></span>
-                                    <span class="text-sm text-on-surface/80">Bank BCA</span>
-                                </div>
-                            </td>
-                            <td class="px-8 py-6 text-right">
-                                <span class="text-sm font-bold text-tertiary">- 1.299.000</span>
-                            </td>
-                        </tr>
-                        <!-- Row 5 -->
-                        <tr class="hover:bg-white/2 transition-colors group border-b-0 cursor-pointer">
-                            <td class="px-8 py-6 text-sm text-on-surface/80">08 Okt 2023</td>
-                            <td class="px-8 py-6">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-xl bg-surface-container-highest flex items-center justify-center text-secondary group-hover:scale-110 group-hover:bg-secondary/20 transition-all">
-                                        <span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-on-surface group-hover:text-secondary transition-colors">Dividen Saham BBCA</p>
-                                        <p class="text-[10px] text-on-surface-variant">Passive Income</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-8 py-6">
-                                <span class="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold bg-secondary-container/20 text-secondary">Investasi</span>
-                            </td>
-                            <td class="px-8 py-6">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-secondary-fixed shadow-[0_0_8px_rgba(111,251,190,0.4)]"></span>
-                                    <span class="text-sm text-on-surface/80">Rek. Saham</span>
-                                </div>
-                            </td>
-                            <td class="px-8 py-6 text-right">
-                                <span class="text-sm font-bold text-secondary">+ 4.250.000</span>
-                            </td>
-                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
-            
+
             <!-- Pagination -->
+            @if($transactions->hasPages())
             <div class="px-8 py-6 border-t border-white/5 flex items-center justify-between">
-                <span class="text-xs text-on-surface-variant">Menampilkan 5 dari 124 transaksi</span>
-                <div class="flex gap-2">
-                    <button class="p-2 rounded-lg bg-surface-container-highest border border-white/5 text-on-surface hover:bg-white/10 transition-colors">
-                        <span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
-                    </button>
-                    <button class="px-4 py-2 rounded-lg bg-primary text-on-primary text-xs font-bold hover:opacity-90 transition-opacity">1</button>
-                    <button class="px-4 py-2 rounded-lg bg-surface-container-highest border border-white/5 text-on-surface hover:bg-white/10 transition-colors text-xs font-bold">2</button>
-                    <button class="px-4 py-2 rounded-lg bg-surface-container-highest border border-white/5 text-on-surface hover:bg-white/10 transition-colors text-xs font-bold">3</button>
-                    <button class="p-2 rounded-lg bg-surface-container-highest border border-white/5 text-on-surface hover:bg-white/10 transition-colors">
-                        <span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
-                    </button>
+                <span class="text-xs text-on-surface-variant">
+                    Menampilkan {{ $transactions->firstItem() }}–{{ $transactions->lastItem() }} dari {{ $transactions->total() }} transaksi
+                </span>
+                <div class="text-sm text-on-surface-variant">
+                    {{ $transactions->withQueryString()->links() }}
                 </div>
             </div>
+            @else
+            <div class="px-8 py-4 border-t border-white/5">
+                <span class="text-xs text-on-surface-variant">{{ $transactions->count() }} transaksi</span>
+            </div>
+            @endif
         </div>
     </section>
-    
-    <!-- Signature Trend Info -->
+
+    <!-- Insight Cards -->
+    @if($transactions->count() > 0)
     <section class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="glass-card p-8 rounded-2xl flex flex-col gap-4">
-            <span class="material-symbols-outlined text-secondary text-3xl" data-icon="insights">insights</span>
-            <p class="text-sm text-on-surface-variant">Pengeluaran kamu 12% lebih rendah dibandingkan bulan lalu pada periode yang sama.</p>
-            <div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden mt-auto">
-                <div class="bg-secondary h-full shadow-[0_0_10px_rgba(78,222,163,0.5)]" style="width: 65%"></div>
-            </div>
+            <span class="material-symbols-outlined text-secondary text-3xl">insights</span>
+            <p class="text-sm text-on-surface-variant">Rata-rata pengeluaran harian bulan ini.</p>
+            <p class="text-2xl font-bold text-secondary">
+                Rp {{ number_format(auth()->user()->transactions()->where('type','expense')->whereMonth('date', now()->month)->sum('amount') / max(now()->day, 1), 0, ',', '.') }}
+            </p>
         </div>
         <div class="glass-card p-8 rounded-2xl flex flex-col gap-4">
-            <span class="material-symbols-outlined text-primary text-3xl" data-icon="savings">savings</span>
-            <p class="text-sm text-on-surface-variant">Kategori "Makanan" mendominasi 42% dari total pengeluaran operasional minggu ini.</p>
-            <div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden mt-auto">
-                <div class="bg-primary h-full shadow-[0_0_10px_rgba(173,198,255,0.5)]" style="width: 42%"></div>
-            </div>
+            <span class="material-symbols-outlined text-primary text-3xl">savings</span>
+            <p class="text-sm text-on-surface-variant">Total transaksi bulan ini.</p>
+            <p class="text-2xl font-bold text-primary">
+                {{ auth()->user()->transactions()->whereMonth('date', now()->month)->count() }} transaksi
+            </p>
         </div>
         <div class="glass-card p-8 rounded-2xl flex flex-col gap-4">
-            <span class="material-symbols-outlined text-tertiary text-3xl" data-icon="warning">warning</span>
-            <p class="text-sm text-on-surface-variant">Anggaran hiburan tersisa Rp 200.000 lagi sebelum mencapai batas limit bulanan.</p>
-            <div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden mt-auto">
-                <div class="bg-tertiary h-full shadow-[0_0_10px_rgba(255,81,106,0.5)]" style="width: 88%"></div>
-            </div>
+            <span class="material-symbols-outlined text-tertiary-container text-3xl">account_balance_wallet</span>
+            <p class="text-sm text-on-surface-variant">Saldo bersih bulan ini (pemasukan - pengeluaran).</p>
+            @php
+                $netBalance = auth()->user()->transactions()->where('type','income')->whereMonth('date',now()->month)->sum('amount')
+                            - auth()->user()->transactions()->where('type','expense')->whereMonth('date',now()->month)->sum('amount');
+            @endphp
+            <p class="text-2xl font-bold {{ $netBalance >= 0 ? 'text-secondary' : 'text-tertiary-container' }}">
+                {{ $netBalance >= 0 ? '+' : '' }}Rp {{ number_format($netBalance, 0, ',', '.') }}
+            </p>
         </div>
     </section>
+    @endif
 </x-app-layout>
