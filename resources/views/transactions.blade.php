@@ -12,8 +12,14 @@
         x-data="{
             showModal: false,
             type: 'expense',
+            amountRaw: '',
+            amountDisplay: '',
             wallets: {{ $wallets->toJson() }},
-            categories: {{ $categories->toJson() }}
+            categories: {{ $categories->toJson() }},
+            setAmount(value) {
+                this.amountRaw = window.financeNumber.sanitize(value);
+                this.amountDisplay = window.financeNumber.format(this.amountRaw);
+            }
         }">
         <div>
             <span class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant block mb-2">Manajemen Keuangan</span>
@@ -43,7 +49,7 @@
 
         <!-- Add Transaction Modal -->
         <template x-teleport="body">
-            <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+            <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4"
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100"
@@ -54,7 +60,7 @@
                 <div class="absolute inset-0 bg-surface/80 backdrop-blur-xl" @click="showModal = false"></div>
 
                 <!-- Modal Content -->
-                <div class="relative bg-surface-container-low border border-white/10 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden"
+                <div class="relative bg-surface-container-low border border-white/10 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden max-h-[calc(100vh-2rem)] flex flex-col"
                     x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 scale-95"
                     x-transition:enter-end="opacity-100 scale-100"
@@ -63,24 +69,24 @@
                         @csrf
                         <input type="hidden" name="type" x-model="type">
 
-                        <div class="px-8 py-6 border-b border-white/5 flex justify-between items-center">
-                            <h3 class="text-xl font-semibold">Catat Transaksi</h3>
+                        <div class="px-6 py-4 border-b border-white/5 flex justify-between items-center shrink-0">
+                            <h3 class="text-lg font-semibold">Catat Transaksi</h3>
                             <button type="button" @click="showModal = false" class="text-on-surface-variant hover:text-on-surface transition-colors">
                                 <span class="material-symbols-outlined">close</span>
                             </button>
                         </div>
 
-                        <div class="p-8 space-y-6">
+                        <div class="p-6 space-y-5 overflow-y-auto">
                             <!-- Type Toggle -->
                             <div class="flex p-1 bg-surface-container-high rounded-xl border border-white/5">
                                 <button type="button" @click="type = 'expense'"
                                     :class="type === 'expense' ? 'bg-tertiary-container text-on-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
-                                    class="flex-1 py-3 rounded-lg text-xs uppercase tracking-widest transition-all">
+                                    class="flex-1 py-2.5 rounded-lg text-[11px] uppercase tracking-widest transition-all">
                                     Pengeluaran
                                 </button>
                                 <button type="button" @click="type = 'income'"
                                     :class="type === 'income' ? 'bg-secondary text-on-secondary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
-                                    class="flex-1 py-3 rounded-lg text-xs uppercase tracking-widest transition-all">
+                                    class="flex-1 py-2.5 rounded-lg text-[11px] uppercase tracking-widest transition-all">
                                     Pemasukan
                                 </button>
                             </div>
@@ -89,14 +95,15 @@
                             <div class="space-y-2">
                                 <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Jumlah</label>
                                 <div class="relative">
-                                    <span class="absolute left-5 top-1/2 -translate-y-1/2 text-xl font-bold text-on-surface-variant">Rp</span>
-                                    <input name="amount" type="number" step="1" min="1"
-                                        class="w-full bg-surface-container-highest border-none rounded-2xl pl-14 pr-6 py-5 text-3xl font-bold tracking-tight text-on-surface focus:ring-2 focus:ring-primary/30 outline-none placeholder:text-on-surface-variant/20"
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-on-surface-variant">Rp</span>
+                                    <input type="hidden" name="amount" :value="amountRaw">
+                                    <input x-model="amountDisplay" @input="setAmount($event.target.value)" type="text" inputmode="numeric" autocomplete="off"
+                                        class="w-full bg-surface-container-highest border-none rounded-xl pl-12 pr-5 py-4 text-2xl font-bold tracking-tight text-on-surface focus:ring-2 focus:ring-primary/30 outline-none placeholder:text-on-surface-variant/20"
                                         placeholder="0" required>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <!-- Wallet -->
                                 <div class="space-y-2">
                                     <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Dompet</label>
@@ -123,29 +130,31 @@
                                 </div>
                             </div>
 
-                            <!-- Description -->
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Deskripsi</label>
-                                <input name="description" type="text"
-                                    class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none placeholder:text-on-surface-variant/30"
-                                    placeholder="Untuk apa pengeluaran ini?">
-                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <!-- Description -->
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Deskripsi</label>
+                                    <input name="description" type="text"
+                                        class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none placeholder:text-on-surface-variant/30"
+                                        placeholder="Untuk apa transaksi ini?">
+                                </div>
 
-                            <!-- Date -->
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Tanggal</label>
-                                <input name="date" type="date" value="{{ date('Y-m-d') }}"
-                                    class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none" required>
+                                <!-- Date -->
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Tanggal</label>
+                                    <input name="date" type="date" value="{{ date('Y-m-d') }}"
+                                        class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none" required>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="px-8 py-5 bg-surface-container-high/50 border-t border-white/5 flex gap-3">
+                        <div class="px-6 py-4 bg-surface-container-high/50 border-t border-white/5 flex gap-3 shrink-0">
                             <button type="submit"
-                                class="flex-1 py-4 bg-primary text-on-primary font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                                class="flex-1 py-3.5 bg-primary text-on-primary font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
                                 Simpan
                             </button>
                             <button type="button" @click="showModal = false"
-                                class="px-6 py-4 text-on-surface-variant font-medium hover:bg-white/5 rounded-xl transition-all">
+                                class="px-5 py-3.5 text-on-surface-variant font-medium hover:bg-white/5 rounded-xl transition-all">
                                 Batal
                             </button>
                         </div>

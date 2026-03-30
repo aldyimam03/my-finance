@@ -7,8 +7,14 @@
     aria-modal="true"
     x-data="{ 
         type: 'expense',
+        amountRaw: '',
+        amountDisplay: '',
         wallets: {{ $allWallets->toJson() }},
-        categories: {{ $allCategories->toJson() }}
+        categories: {{ $allCategories->toJson() }},
+        setAmount(value) {
+            this.amountRaw = window.financeNumber.sanitize(value);
+            this.amountDisplay = window.financeNumber.format(this.amountRaw);
+        }
     }"
 >
     <!-- Background backdrop -->
@@ -61,7 +67,8 @@
                             <label class="text-[11px] uppercase tracking-widest font-semibold text-on-surface-variant ml-1">Nominal Transaksi</label>
                             <div class="relative flex items-center group">
                                 <span class="absolute left-0 text-3xl font-semibold text-on-surface-variant group-focus-within:text-on-surface transition-colors" :class="{'text-secondary': type === 'income', 'text-tertiary-container': type === 'expense'}">Rp</span>
-                                <input name="amount" class="w-full bg-transparent border-0 border-b-2 border-surface-container-highest focus:border-primary focus:ring-0 text-4xl font-bold pl-12 py-3 text-on-surface transition-all placeholder:text-surface-container-highest outline-none" placeholder="0" type="number" step="1" min="1" required />
+                                <input type="hidden" name="amount" :value="amountRaw" />
+                                <input x-model="amountDisplay" @input="setAmount($event.target.value)" inputmode="numeric" autocomplete="off" class="w-full bg-transparent border-0 border-b-2 border-surface-container-highest focus:border-primary focus:ring-0 text-4xl font-bold pl-12 py-3 text-on-surface transition-all placeholder:text-surface-container-highest outline-none" placeholder="0" type="text" required />
                             </div>
                         </div>
                         

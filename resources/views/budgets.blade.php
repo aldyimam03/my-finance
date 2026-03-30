@@ -7,7 +7,27 @@
     </div>
     @endif
 
-    <div class="max-w-[1400px] mx-auto space-y-12" x-data="{ showAddModal: false, showEditModal: false, editBudget: { id: null, category_id: null, amount: 0, period: '' } }">
+    <div class="max-w-[1400px] mx-auto space-y-12" x-data="{
+        showAddModal: false,
+        showEditModal: false,
+        addAmountRaw: '',
+        addAmountDisplay: '',
+        editAmountDisplay: '',
+        editBudget: { id: null, category_id: null, amount: 0, period: '' },
+        setAddAmount(value) {
+            this.addAmountRaw = window.financeNumber.sanitize(value);
+            this.addAmountDisplay = window.financeNumber.format(this.addAmountRaw);
+        },
+        setEditAmount(value) {
+            this.editBudget.amount = window.financeNumber.sanitize(value);
+            this.editAmountDisplay = window.financeNumber.format(this.editBudget.amount);
+        },
+        openEditBudget(budget) {
+            this.editBudget = { ...budget, amount: String(budget.amount ?? '') };
+            this.editAmountDisplay = window.financeNumber.format(this.editBudget.amount);
+            this.showEditModal = true;
+        }
+    }">
         <!-- Header Section -->
         <section class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 relative">
             <div>
@@ -89,7 +109,7 @@
                             <div class="flex items-center gap-2">
                                 <span class="text-xs font-mono {{ $textColor }}">{{ round($pct) }}%</span>
                                     <button type="button" 
-                                        @click="editBudget = {{ json_encode($budget) }}; showEditModal = true"
+                                        @click="openEditBudget({{ json_encode($budget) }})"
                                         class="opacity-0 group-hover:opacity-100 transition-opacity text-on-surface-variant/40 hover:text-primary">
                                         <span class="material-symbols-outlined text-sm">edit</span>
                                     </button>
@@ -249,7 +269,8 @@
                                 <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Batas Anggaran (Rp)</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">Rp</span>
-                                    <input name="amount" type="number" step="1000" min="0"
+                                    <input type="hidden" name="amount" :value="addAmountRaw">
+                                    <input x-model="addAmountDisplay" @input="setAddAmount($event.target.value)" type="text" inputmode="numeric" autocomplete="off"
                                         class="w-full bg-surface-container-highest border-none rounded-xl pl-12 pr-4 py-3 text-on-surface text-lg font-bold outline-none focus:ring-2 focus:ring-primary/20"
                                         placeholder="0" required>
                                 </div>
@@ -311,7 +332,8 @@
                                 <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Batas Anggaran (Rp)</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">Rp</span>
-                                    <input name="amount" type="number" step="1000" min="0" x-model="editBudget.amount"
+                                    <input type="hidden" name="amount" :value="editBudget.amount">
+                                    <input type="text" inputmode="numeric" autocomplete="off" x-model="editAmountDisplay" @input="setEditAmount($event.target.value)"
                                         class="w-full bg-surface-container-highest border-none rounded-xl pl-12 pr-4 py-3 text-on-surface text-lg font-bold outline-none focus:ring-2 focus:ring-primary/20"
                                         placeholder="0" required>
                                 </div>
