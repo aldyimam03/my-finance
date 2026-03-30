@@ -48,6 +48,11 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'currency' => 'IDR',
+            'locale' => 'id',
+            'notify_weekly_report' => true,
+            'notify_budget_alert' => true,
+            'notify_marketing_tips' => false,
         ]);
 
         Auth::login($user);

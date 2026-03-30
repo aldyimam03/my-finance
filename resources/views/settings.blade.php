@@ -25,7 +25,7 @@
         </header>
 
         <!-- Bento Grid Layout -->
-        <form action="{{ route('profile.update') }}" method="POST" class="grid grid-cols-12 gap-8">
+        <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="grid grid-cols-12 gap-8">
             @csrf
             @method('PUT')
             <!-- Left Column: Personal Info & Avatar -->
@@ -35,15 +35,20 @@
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-6">
                         <div class="flex items-center gap-8">
                             <div class="relative group cursor-pointer">
-                                <img alt="User Avatar Large" class="w-24 h-24 rounded-2xl border-2 border-white/5 object-cover group-hover:opacity-80 transition-opacity" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=2C3E50&color=FFFFFF&size=150"/>
-                                <button class="absolute -bottom-2 -right-2 bg-linear-to-br from-primary to-primary-container w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 hover:scale-105 transition-transform">
+                                <img alt="User Avatar Large" class="w-24 h-24 rounded-2xl border-2 border-white/5 object-cover group-hover:opacity-80 transition-opacity" src="{{ auth()->user()->avatarUrl() }}"/>
+                                <label for="avatar" class="absolute -bottom-2 -right-2 bg-linear-to-br from-primary to-primary-container w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 hover:scale-105 transition-transform cursor-pointer">
                                     <span class="material-symbols-outlined text-on-primary text-xl">photo_camera</span>
-                                </button>
+                                </label>
                             </div>
                             <div>
                                 <h3 class="text-xl font-semibold mb-1">Informasi Pribadi</h3>
                                 <p class="text-sm text-on-surface-variant opacity-70">Perbarui identitas dan foto profil Anda.</p>
                             </div>
+                        </div>
+                        <div class="space-y-2">
+                            <input id="avatar" name="avatar" type="file" accept=".jpg,.jpeg,.png,.webp" class="block w-full text-sm text-on-surface-variant file:mr-4 file:rounded-xl file:border-0 file:bg-primary/15 file:px-4 file:py-2 file:font-medium file:text-primary hover:file:bg-primary/20" />
+                            <p class="text-[11px] text-on-surface-variant/70">Format: JPG, PNG, atau WEBP. Maksimal 2MB.</p>
+                            @error('avatar') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -79,8 +84,8 @@
                             </div>
                             <button type="button" @click="isPasswordModalOpen = true" class="px-4 py-2 text-primary font-medium hover:bg-primary/10 rounded-lg transition-colors text-sm w-full sm:w-auto mt-2 sm:mt-0">Ubah Sandi</button>
                         </div>
-                        <div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-xl border border-white/5 hover:border-white/10 transition-colors cursor-pointer group" onclick="document.getElementById('2fa-toggle').click()">
-                            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full justify-between pointer-events-none">
+                        <label for="2fa-toggle" class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-xl border border-white/5 hover:border-white/10 transition-colors cursor-pointer group">
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full justify-between">
                                 <div class="flex items-center gap-4">
                                     <div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center shrink-0">
                                         <span class="material-symbols-outlined text-sm">vibration</span>
@@ -90,12 +95,12 @@
                                         <p class="text-[12px] text-on-surface-variant mt-0.5">Amankan akun dengan verifikasi tambahan</p>
                                     </div>
                                 </div>
-                                <label class="relative inline-flex items-center cursor-pointer mt-3 sm:mt-0 shrink-0 pointer-events-auto">
+                                <span class="relative inline-flex items-center cursor-pointer mt-3 sm:mt-0 shrink-0">
                                     <input id="2fa-toggle" checked="" class="sr-only peer" type="checkbox"/>
                                     <div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
-                                </label>
+                                </span>
                             </div>
-                        </div>
+                        </label>
                         
                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-red-500/10 rounded-xl border border-red-500/20 gap-4 hover:border-red-500/30 transition-colors mt-6">
                             <div class="flex items-center gap-4">
@@ -125,22 +130,22 @@
                         <div class="space-y-2">
                             <label class="text-sm font-medium uppercase tracking-widest text-on-surface-variant">Mata Uang Utama</label>
                             <div class="relative">
-                                <select class="w-full bg-surface-container-lowest border border-white/5 rounded-xl px-4 py-3 text-on-surface appearance-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-colors outline-none cursor-pointer">
-                                    <option class="bg-surface-container">IDR - Rupiah Indonesia</option>
-                                    <option class="bg-surface-container">USD - US Dollar</option>
+                                <select name="currency" class="w-full bg-surface-container-lowest border border-white/5 rounded-xl px-4 py-3 text-on-surface appearance-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-colors outline-none cursor-pointer">
+                                    <option value="IDR" class="bg-surface-container" {{ old('currency', auth()->user()->currency ?? 'IDR') === 'IDR' ? 'selected' : '' }}>IDR - Rupiah Indonesia</option>
                                 </select>
                                 <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">expand_more</span>
                             </div>
+                            @error('currency') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-medium uppercase tracking-widest text-on-surface-variant">Bahasa Aplikasi</label>
                             <div class="relative">
-                                <select class="w-full bg-surface-container-lowest border border-white/5 rounded-xl px-4 py-3 text-on-surface appearance-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-colors outline-none cursor-pointer">
-                                    <option class="bg-surface-container">Bahasa Indonesia</option>
-                                    <option class="bg-surface-container">English (US)</option>
+                                <select name="locale" class="w-full bg-surface-container-lowest border border-white/5 rounded-xl px-4 py-3 text-on-surface appearance-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-colors outline-none cursor-pointer">
+                                    <option value="id" class="bg-surface-container" {{ old('locale', auth()->user()->locale ?? 'id') === 'id' ? 'selected' : '' }}>Bahasa Indonesia</option>
                                 </select>
                                 <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">expand_more</span>
                             </div>
+                            @error('locale') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
                 </div>
@@ -152,36 +157,39 @@
                         <h3 class="text-xl font-semibold">Notifikasi</h3>
                     </div>
                     <div class="space-y-6">
-                        <div class="flex items-center justify-between group cursor-pointer" onclick="document.getElementById('notif-1').click()">
+                        <label for="notif-1" class="flex items-center justify-between group cursor-pointer">
                             <div>
                                 <p class="font-medium text-sm group-hover:text-primary transition-colors">Laporan Mingguan</p>
-                                <p class="text-[11px] text-on-surface-variant mt-0.5 pointer-events-none">Terima ringkasan finansial</p>
+                                <p class="text-[11px] text-on-surface-variant mt-0.5">Terima ringkasan finansial</p>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer shrink-0 pointer-events-auto">
-                                <input id="notif-1" checked="" class="sr-only peer" type="checkbox"/>
+                            <span class="relative inline-flex items-center cursor-pointer shrink-0">
+                                <input type="hidden" name="notify_weekly_report" value="0" />
+                                <input id="notif-1" name="notify_weekly_report" value="1" {{ old('notify_weekly_report', auth()->user()->notify_weekly_report) ? 'checked' : '' }} class="sr-only peer" type="checkbox"/>
                                 <div class="w-9 h-5 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
-                            </label>
-                        </div>
-                        <div class="flex items-center justify-between group cursor-pointer" onclick="document.getElementById('notif-2').click()">
+                            </span>
+                        </label>
+                        <label for="notif-2" class="flex items-center justify-between group cursor-pointer">
                             <div>
                                 <p class="font-medium text-sm group-hover:text-primary transition-colors">Peringatan Anggaran</p>
-                                <p class="text-[11px] text-on-surface-variant mt-0.5 pointer-events-none">Saat pengeluaran melebihi 80%</p>
+                                <p class="text-[11px] text-on-surface-variant mt-0.5">Saat pengeluaran melebihi 80%</p>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer shrink-0 pointer-events-auto">
-                                <input id="notif-2" checked="" class="sr-only peer" type="checkbox"/>
+                            <span class="relative inline-flex items-center cursor-pointer shrink-0">
+                                <input type="hidden" name="notify_budget_alert" value="0" />
+                                <input id="notif-2" name="notify_budget_alert" value="1" {{ old('notify_budget_alert', auth()->user()->notify_budget_alert) ? 'checked' : '' }} class="sr-only peer" type="checkbox"/>
                                 <div class="w-9 h-5 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
-                            </label>
-                        </div>
-                        <div class="flex items-center justify-between opacity-50 hover:opacity-100 transition-opacity cursor-pointer group" onclick="document.getElementById('notif-3').click()">
+                            </span>
+                        </label>
+                        <label for="notif-3" class="flex items-center justify-between opacity-50 hover:opacity-100 transition-opacity cursor-pointer group">
                             <div>
-                                <p class="font-medium text-sm group-hover:text-primary transition-colors">Tips Investasi</p>
-                                <p class="text-[11px] text-on-surface-variant mt-0.5 pointer-events-none">Analisis pasar harian</p>
+                                <p class="font-medium text-sm group-hover:text-primary transition-colors">Tips Finansial</p>
+                                <p class="text-[11px] text-on-surface-variant mt-0.5">Rekomendasi dan insight produk di masa depan</p>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer shrink-0 pointer-events-auto">
-                                <input id="notif-3" class="sr-only peer" type="checkbox"/>
+                            <span class="relative inline-flex items-center cursor-pointer shrink-0">
+                                <input type="hidden" name="notify_marketing_tips" value="0" />
+                                <input id="notif-3" name="notify_marketing_tips" value="1" {{ old('notify_marketing_tips', auth()->user()->notify_marketing_tips) ? 'checked' : '' }} class="sr-only peer" type="checkbox"/>
                                 <div class="w-9 h-5 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
-                            </label>
-                        </div>
+                            </span>
+                        </label>
                     </div>
                 </div>
 

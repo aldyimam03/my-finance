@@ -46,8 +46,8 @@
                 <span class="text-[14px]">Laporan</span>
             </a>
         </nav>
-        <div class="mt-auto space-y-1">
-            <button @click="isTransactionModalOpen = true" class="w-full mb-6 py-3 bg-linear-to-br from-primary to-primary-container text-on-primary font-semibold rounded-xl text-sm shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform">
+        <div class="mt-auto pt-8 space-y-2">
+            <button @click="isTransactionModalOpen = true" class="w-full mb-4 py-3 bg-linear-to-br from-primary to-primary-container text-on-primary font-semibold rounded-xl text-sm shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform">
                 Tambah Transaksi
             </button>
             <a class="flex items-center gap-3 px-4 py-2 {{ request()->routeIs('settings') ? 'text-[#adc6ff] font-semibold border-r-2 border-[#adc6ff] bg-white/5' : 'text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5' }} transition-all duration-200" href="{{ route('settings') }}">
@@ -73,14 +73,16 @@
         <div class="flex items-center gap-6">
             <button class="relative text-[#e5e2e1]/80 hover:text-white transition-colors">
                 <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
-                <span class="absolute top-0 right-0 w-2 h-2 bg-tertiary-container rounded-full border-2 border-surface-container-low"></span>
+                @if ((Auth::user()?->notify_budget_alert && Auth::user()?->budgets()->exists()) || Auth::user()?->notify_weekly_report)
+                    <span class="absolute top-0 right-0 w-2 h-2 bg-tertiary-container rounded-full border-2 border-surface-container-low"></span>
+                @endif
             </button>
             <div class="flex items-center gap-3 pl-6 border-l border-white/10">
                 <div class="text-right">
                     <p class="text-xs font-semibold">{{ Auth::user()->name ?? 'Guest' }}</p>
                     <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">{{ Auth::user()->email ?? 'guest@example.com' }}</p>
                 </div>
-                <img alt="User Profile Avatar" class="w-8 h-8 rounded-full object-cover ring-1 ring-primary/20" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'Guest') }}&background=2C3E50&color=FFFFFF" />
+                <img alt="User Profile Avatar" class="w-8 h-8 rounded-full object-cover ring-1 ring-primary/20" src="{{ Auth::user()?->avatarUrl() }}" />
             </div>
         </div>
     </header>

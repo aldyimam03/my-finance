@@ -28,7 +28,7 @@
             </div>
             <img alt="User profile avatar"
                 class="w-8 h-8 rounded-full object-cover ring-1 ring-primary/20"
-                src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'User') }}&background=2C3E50&color=FFFFFF" />
+                src="{{ Auth::user()?->avatarUrl() }}" />
         </div>
     </nav>
 
