@@ -37,6 +37,10 @@
                 <span class="material-symbols-outlined {{ request()->routeIs('budgets') ? '[font-variation-settings:\'FILL\'_1]' : '' }}" data-icon="pie_chart">pie_chart</span>
                 <span class="text-[14px]">Anggaran</span>
             </a>
+            <a class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('categories') ? 'text-[#adc6ff] font-semibold border-r-2 border-[#adc6ff] bg-white/5' : 'text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5' }} transition-all duration-200" href="{{ route('categories') }}">
+                <span class="material-symbols-outlined {{ request()->routeIs('categories') ? '[font-variation-settings:\'FILL\'_1]' : '' }}">category</span>
+                <span class="text-[14px]">Kategori</span>
+            </a>
             <a class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('reports') ? 'text-[#adc6ff] font-semibold border-r-2 border-[#adc6ff] bg-white/5' : 'text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5' }} transition-all duration-200" href="{{ route('reports') }}">
                 <span class="material-symbols-outlined {{ request()->routeIs('reports') ? '[font-variation-settings:\'FILL\'_1]' : '' }}" data-icon="assessment">assessment</span>
                 <span class="text-[14px]">Laporan</span>
