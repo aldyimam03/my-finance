@@ -99,11 +99,13 @@
                     class="bg-surface-container-high hover:bg-surface-container-highest transition-all duration-300 rounded-4xl p-8 border border-white/5 group relative overflow-hidden"
                 >
                     <!-- Background Blur Accent -->
-                    <div class="absolute -right-4 -top-4 w-32 h-32 {{ $wallet->color ?? 'bg-primary' }}/10 blur-[60px] rounded-full group-hover:bg-primary/20 transition-all pointer-events-none"></div>
+                    <div class="absolute -right-4 -top-4 w-32 h-32 blur-[60px] rounded-full transition-all pointer-events-none opacity-35"
+                        style="background-color: {{ $wallet->resolvedColor() }}"></div>
                     
                     <div class="flex justify-between items-start mb-8 relative z-20">
-                        <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center backdrop-blur-sm">
-                            <span class="material-symbols-outlined {{ $wallet->color ? 'text-white' : 'text-primary' }} text-2xl">{{ $wallet->icon ?? 'account_balance' }}</span>
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/10"
+                            style="background-color: {{ $wallet->resolvedColor() }}22; color: {{ $wallet->resolvedColor() }}">
+                            <span class="material-symbols-outlined text-2xl">{{ $wallet->resolvedIcon() }}</span>
                         </div>
                         <div class="flex gap-3">
                             <!-- Detail -->

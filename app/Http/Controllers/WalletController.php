@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 
 class WalletController extends Controller
 {
+    private array $walletTypes = ['Bank', 'E-Wallet', 'Investasi', 'Tunai', 'Kripto'];
+
     public function index()
     {
         $wallets = Auth::user()->wallets()->get();
@@ -26,21 +28,23 @@ class WalletController extends Controller
 
     public function create()
     {
-        return view('create-wallet');
+        $walletTypes = $this->walletTypes;
+        $walletColorPresets = array_values(Wallet::TYPE_COLORS);
+
+        return view('create-wallet', compact('walletTypes', 'walletColorPresets'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name'     => 'required|string|max:255',
-            'type'     => 'required|string',
+            'type'     => 'required|in:' . implode(',', $this->walletTypes),
             'balance'  => 'required|numeric|min:0',
-            'currency' => 'required|string',
-            'icon'     => 'nullable|string',
-            'color'    => 'nullable|string',
+            'currency' => 'required|in:IDR',
+            'color'    => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
         ]);
 
-        Auth::user()->wallets()->create($validated);
+        Auth::user()->wallets()->create($this->buildWalletPayload($validated));
 
         return redirect()->route('wallets')->with('success', 'Dompet berhasil ditambahkan.');
     }
@@ -52,7 +56,10 @@ class WalletController extends Controller
             abort(403);
         }
 
-        return view('edit-wallet', compact('wallet'));
+        $walletTypes = $this->walletTypes;
+        $walletColorPresets = array_values(Wallet::TYPE_COLORS);
+
+        return view('edit-wallet', compact('wallet', 'walletTypes', 'walletColorPresets'));
     }
 
     public function update(Request $request, Wallet $wallet)
@@ -63,14 +70,13 @@ class WalletController extends Controller
 
         $validated = $request->validate([
             'name'     => 'required|string|max:255',
-            'type'     => 'required|string',
+            'type'     => 'required|in:' . implode(',', $this->walletTypes),
             'balance'  => 'required|numeric',
-            'currency' => 'required|string',
-            'icon'     => 'nullable|string',
-            'color'    => 'nullable|string',
+            'currency' => 'required|in:IDR',
+            'color'    => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
         ]);
 
-        $wallet->update($validated);
+        $wallet->update($this->buildWalletPayload($validated));
 
         return redirect()->route('wallets')->with('success', 'Dompet berhasil diperbarui.');
     }
@@ -84,5 +90,13 @@ class WalletController extends Controller
         $wallet->delete();
 
         return redirect()->route('wallets')->with('success', 'Dompet berhasil dihapus.');
+    }
+
+    private function buildWalletPayload(array $validated): array
+    {
+        $validated['icon'] = Wallet::defaultIconForType($validated['type']);
+        $validated['color'] = $validated['color'] ?: Wallet::defaultColorForType($validated['type']);
+
+        return $validated;
     }
 }
