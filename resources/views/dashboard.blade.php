@@ -1,5 +1,5 @@
 <x-app-layout title="Dasbor - My Finance">
-    <!-- Summary Section: Editorial Scale -->
+    <!-- Summary Section -->
     <section class="mb-12">
         <div class="flex justify-between items-end mb-8">
             <div>
@@ -9,7 +9,7 @@
             <div class="flex gap-4">
                 <div class="glass-card px-6 py-4 rounded-xl flex items-center gap-4">
                     <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-secondary" data-icon="trending_up">trending_up</span>
+                        <span class="material-symbols-outlined text-secondary">trending_up</span>
                     </div>
                     <div>
                         <p class="text-[11px] uppercase tracking-wider text-on-surface-variant">Pemasukan</p>
@@ -18,7 +18,7 @@
                 </div>
                 <div class="glass-card px-6 py-4 rounded-xl flex items-center gap-4">
                     <div class="w-10 h-10 rounded-full bg-tertiary-container/10 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-tertiary-container" data-icon="trending_down">trending_down</span>
+                        <span class="material-symbols-outlined text-tertiary-container">trending_down</span>
                     </div>
                     <div>
                         <p class="text-[11px] uppercase tracking-wider text-on-surface-variant">Pengeluaran</p>
@@ -29,9 +29,9 @@
         </div>
     </section>
 
-    <!-- Bento Grid Layout -->
+    <!-- Bento Grid -->
     <div class="grid grid-cols-12 gap-6">
-        <!-- Cashflow Chart: Large Span -->
+        <!-- Cashflow Chart -->
         <div class="col-span-12 lg:col-span-8 bg-surface-container-low p-8 rounded-xl shadow-lg border border-white/5 relative overflow-hidden">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-lg font-semibold">Arus Kas 7 Hari Terakhir</h3>
@@ -47,9 +47,46 @@
             <div class="relative h-64">
                 <canvas id="cashflowChart"></canvas>
             </div>
+
+            {{-- AI Insights strip di bawah chart --}}
+            @if(count($aiInsights) > 0)
+            <div class="mt-5 pt-4 border-t border-white/5">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="material-symbols-outlined text-[14px] text-violet-400" style="font-variation-settings:'FILL' 1">auto_awesome</span>
+                    <span class="text-[10px] uppercase tracking-widest text-on-surface-variant/50 font-semibold">Analisis Cerdas</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    @foreach($aiInsights as $insight)
+                    @php
+                        $dot = match($insight['type']) {
+                            'danger'  => 'bg-red-500',
+                            'warning' => 'bg-amber-400',
+                            'success' => 'bg-emerald-500',
+                            default   => 'bg-blue-400',
+                        };
+                        $text = match($insight['type']) {
+                            'danger'  => 'text-red-400',
+                            'warning' => 'text-amber-400',
+                            'success' => 'text-emerald-400',
+                            default   => 'text-blue-400',
+                        };
+                    @endphp
+                    <div class="flex items-start gap-2.5 px-3 py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors">
+                        <span class="w-1.5 h-1.5 rounded-full {{ $dot }} mt-1.5 shrink-0"></span>
+                        <div class="min-w-0">
+                            <span class="text-[11px] font-semibold {{ $text }}">{{ $insight['title'] }}</span>
+                            <span class="text-[11px] text-on-surface-variant/60 ml-1">— {{ $insight['badge'] }}</span>
+                            <p class="text-[10px] text-on-surface-variant/40 mt-0.5 leading-relaxed">{{ $insight['detail'] }}</p>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
-        
-        <!-- Budget Overview: Focused Journey -->
+
+
+        <!-- Budget & Wallets -->
         <div class="col-span-12 lg:col-span-4 space-y-6">
             <div class="bg-surface-container-low p-6 rounded-xl border border-white/5">
                 <h3 class="text-sm font-semibold mb-6">Analisis Anggaran</h3>
@@ -70,8 +107,7 @@
                     @endforelse
                 </div>
             </div>
-            
-            <!-- Active Wallets: Tonal Depth -->
+
             <div class="bg-surface-container-low p-6 rounded-xl border border-white/5">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-sm font-semibold">Dompet Aktif</h3>
@@ -92,58 +128,57 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Recent Activities: Editorial Table -->
-        <div class="col-span-12 mt-4">
-            <div class="bg-surface-container-low rounded-xl border border-white/5 overflow-hidden">
-                <div class="px-8 py-6 border-b border-white/5 flex justify-between items-center">
-                    <h3 class="text-lg font-semibold">Transaksi Terakhir</h3>
-                    <div class="flex gap-4">
-                        <a href="{{ route('transactions') }}" class="px-4 py-1.5 text-xs rounded-full bg-surface-container-highest text-on-surface font-medium border border-white/5 hover:bg-surface-container-highest/80 transition-colors">Lihat Semua</a>
-                    </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="text-left font-['Inter']">
-                                <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Aktivitas</th>
-                                <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Kategori</th>
-                                <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Tanggal</th>
-                                <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold text-right">Jumlah</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-white/5">
-                            @forelse($recentTransactions as $transaction)
-                            <tr class="hover:bg-white/5 transition-colors group cursor-pointer">
-                                <td class="px-8 py-5">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center group-hover:bg-surface-variant transition-colors">
-                                            <span class="material-symbols-outlined text-on-surface">{{ $transaction->category->icon ?? 'payments' }}</span>
-                                        </div>
-                                        <span class="font-medium group-hover:text-primary transition-colors">{{ $transaction->description ?? 'Tanpa Deskripsi' }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-8 py-5">
-                                    <span class="px-3 py-1 rounded-full bg-surface-container-highest text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
-                                        {{ $transaction->category->name ?? 'Uncategorized' }}
-                                    </span>
-                                </td>
-                                <td class="px-8 py-5 text-sm text-on-surface-variant">{{ $transaction->date->format('d M Y') }}</td>
-                                <td class="px-8 py-5 text-right font-bold {{ $transaction->type === 'income' ? 'text-secondary' : 'text-tertiary-container' }}">
-                                    {{ $transaction->type === 'income' ? '+' : '-' }} Rp {{ number_format($transaction->amount, 0, ',', '.') }}
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="4" class="px-8 py-10 text-center text-on-surface-variant/60 italic">Belum ada transaksi tercatat.</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+    <!-- Recent Transactions -->
+    <div class="mt-8">
+        <div class="bg-surface-container-low rounded-xl border border-white/5 overflow-hidden">
+            <div class="px-8 py-6 border-b border-white/5 flex justify-between items-center">
+                <h3 class="text-lg font-semibold">Transaksi Terakhir</h3>
+                <div class="flex gap-4">
+                    <a href="{{ route('transactions') }}" class="px-4 py-1.5 text-xs rounded-full bg-surface-container-highest text-on-surface font-medium border border-white/5 hover:bg-surface-container-highest/80 transition-colors">Lihat Semua</a>
                 </div>
             </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="text-left font-['Inter']">
+                            <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Aktivitas</th>
+                            <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Kategori</th>
+                            <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Tanggal</th>
+                            <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold text-right">Jumlah</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        @forelse($recentTransactions as $transaction)
+                        <tr class="hover:bg-white/5 transition-colors group cursor-pointer">
+                            <td class="px-8 py-5">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center group-hover:bg-surface-variant transition-colors">
+                                        <span class="material-symbols-outlined text-on-surface">{{ $transaction->category->icon ?? 'payments' }}</span>
+                                    </div>
+                                    <span class="font-medium group-hover:text-primary transition-colors">{{ $transaction->description ?? 'Tanpa Deskripsi' }}</span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-5">
+                                <span class="px-3 py-1 rounded-full bg-surface-container-highest text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+                                    {{ $transaction->category->name ?? 'Uncategorized' }}
+                                </span>
+                            </td>
+                            <td class="px-8 py-5 text-sm text-on-surface-variant">{{ $transaction->date->format('d M Y') }}</td>
+                            <td class="px-8 py-5 text-right font-bold {{ $transaction->type === 'income' ? 'text-secondary' : 'text-tertiary-container' }}">
+                                {{ $transaction->type === 'income' ? '+' : '-' }} Rp {{ number_format($transaction->amount, 0, ',', '.') }}
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="px-8 py-10 text-center text-on-surface-variant/60 italic">Belum ada transaksi tercatat.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
     </div>
 </x-app-layout>
 
@@ -155,9 +190,7 @@
     const incomeData = chartData.map(d => d.income);
     const expenseData = chartData.map(d => d.expense);
 
-    const formatRupiah = (value) => {
-        return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
-    };
+    const formatRupiah = (value) => 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
 
     const ctx = document.getElementById('cashflowChart');
     if (!ctx) return;
@@ -174,11 +207,8 @@
                     backgroundColor: 'rgba(78, 222, 163, 0.08)',
                     pointBackgroundColor: 'rgba(78, 222, 163, 1)',
                     pointBorderColor: 'rgba(78, 222, 163, 1)',
-                    pointRadius: 5,
-                    pointHoverRadius: 8,
-                    borderWidth: 2.5,
-                    tension: 0.4,
-                    fill: true,
+                    pointRadius: 5, pointHoverRadius: 8,
+                    borderWidth: 2.5, tension: 0.4, fill: true,
                 },
                 {
                     label: 'Pengeluaran',
@@ -187,34 +217,23 @@
                     backgroundColor: 'rgba(255, 81, 106, 0.08)',
                     pointBackgroundColor: 'rgba(255, 81, 106, 1)',
                     pointBorderColor: 'rgba(255, 81, 106, 1)',
-                    pointRadius: 5,
-                    pointHoverRadius: 8,
-                    borderWidth: 2.5,
-                    tension: 0.4,
-                    fill: true,
+                    pointRadius: 5, pointHoverRadius: 8,
+                    borderWidth: 2.5, tension: 0.4, fill: true,
                 }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
+            interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: {
-                    display: false,
-                },
+                legend: { display: false },
                 tooltip: {
                     backgroundColor: 'rgba(22, 27, 34, 0.95)',
-                    borderColor: 'rgba(255,255,255,0.08)',
-                    borderWidth: 1,
+                    borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1,
                     padding: 14,
-                    titleColor: 'rgba(255,255,255,0.7)',
-                    titleFont: { size: 11, weight: 'bold', family: 'Inter' },
-                    bodyColor: 'rgba(255,255,255,0.9)',
-                    bodyFont: { size: 13, family: 'Inter' },
+                    titleColor: 'rgba(255,255,255,0.7)', titleFont: { size: 11, weight: 'bold', family: 'Inter' },
+                    bodyColor: 'rgba(255,255,255,0.9)', bodyFont: { size: 13, family: 'Inter' },
                     cornerRadius: 12,
                     callbacks: {
                         label: function(ctx) {
@@ -225,26 +244,14 @@
             },
             scales: {
                 x: {
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.04)',
-                        drawTicks: false,
-                    },
-                    ticks: {
-                        color: 'rgba(255, 255, 255, 0.4)',
-                        font: { size: 10, family: 'Inter' },
-                        padding: 8,
-                    },
+                    grid: { color: 'rgba(255, 255, 255, 0.04)', drawTicks: false },
+                    ticks: { color: 'rgba(255, 255, 255, 0.4)', font: { size: 10, family: 'Inter' }, padding: 8 },
                     border: { display: false },
                 },
                 y: {
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.04)',
-                        drawTicks: false,
-                    },
+                    grid: { color: 'rgba(255, 255, 255, 0.04)', drawTicks: false },
                     ticks: {
-                        color: 'rgba(255, 255, 255, 0.4)',
-                        font: { size: 10, family: 'Inter' },
-                        padding: 8,
+                        color: 'rgba(255, 255, 255, 0.4)', font: { size: 10, family: 'Inter' }, padding: 8,
                         callback: (value) => {
                             if (value >= 1000000) return 'Rp ' + (value/1000000).toFixed(1) + 'jt';
                             if (value >= 1000) return 'Rp ' + (value/1000).toFixed(0) + 'rb';

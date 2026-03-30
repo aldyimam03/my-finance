@@ -16,20 +16,15 @@ use App\Policies\WalletPolicy;
 use App\Policies\CategoryPolicy;
 use App\Policies\TransactionPolicy;
 use App\Policies\BudgetPolicy;
+use App\Http\View\Composers\NotificationComposer;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         Gate::policy(Wallet::class, WalletPolicy::class);
@@ -45,5 +40,7 @@ class AppServiceProvider extends ServiceProvider
                 $view->with('allWallets', Auth::user()->wallets);
             }
         });
+
+        View::composer('components.app-layout', NotificationComposer::class);
     }
 }

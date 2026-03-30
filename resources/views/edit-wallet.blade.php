@@ -2,14 +2,17 @@
     <main class="pt-32 pb-20 px-4 sm:px-8 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 relative z-10"
         x-data="{
             walletName: @js(old('name', $wallet->name)),
-            balanceRaw: @js(old('balance', $wallet->balance)),
-            balanceDisplay: '',
+            balanceRaw: @js(old('balance', (int) $wallet->balance)),
+            balanceDisplay: @js(old('balance') ? old('balance') : number_format($wallet->balance, 0, ',', '.')),
             type: @js(old('type', $wallet->type)),
             colorHex: @js(old('color', $wallet->resolvedColor())),
             typeIcons: {{ \Illuminate\Support\Js::from(\App\Models\Wallet::TYPE_ICONS) }},
             typeColors: {{ \Illuminate\Support\Js::from(\App\Models\Wallet::TYPE_COLORS) }},
             init() {
-                this.setBalance(this.balanceRaw);
+                // Hanya format ulang jika window.financeNumber sudah tersedia
+                if (window.financeNumber && this.balanceRaw) {
+                    this.balanceDisplay = window.financeNumber.format(this.balanceRaw);
+                }
             },
             syncColorWithType(selectedType) {
                 if (this.typeColors[selectedType]) this.colorHex = this.typeColors[selectedType];

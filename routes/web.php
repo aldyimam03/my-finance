@@ -53,6 +53,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/download/pdf', [ReportController::class, 'downloadPdf'])->name('reports.pdf');
     Route::get('/reports/download/excel', [ReportController::class, 'downloadExcel'])->name('reports.excel');
 
+    Route::post('/notifications/mark-read', function () {
+        session(['notif_read_at' => now()->timestamp]);
+        return response()->json(['ok' => true]);
+    })->name('notifications.mark-read');
+
     Route::get('/settings', function () {
         return view('settings');
     })->name('settings');
