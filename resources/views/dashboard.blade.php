@@ -1,28 +1,28 @@
 <x-app-layout title="Dasbor - My Finance">
     <!-- Summary Section -->
-    <section class="mb-12">
-        <div class="flex justify-between items-end mb-8">
+    <section class="mb-8 md:mb-12">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-6 md:mb-8">
             <div>
-                <span class="label-sm text-[11px] uppercase tracking-[0.05em] text-on-surface-variant">Saldo Keseluruhan</span>
-                <h2 class="text-[3.5rem] font-semibold tracking-tight text-on-surface leading-tight">Rp {{ number_format($totalBalance, 0, ',', '.') }}</h2>
+                <span class="text-[11px] uppercase tracking-[0.05em] text-on-surface-variant">Saldo Keseluruhan</span>
+                <h2 class="text-[2.2rem] sm:text-[3rem] lg:text-[3.5rem] font-semibold tracking-tight text-on-surface leading-tight">Rp {{ number_format($totalBalance, 0, ',', '.') }}</h2>
             </div>
-            <div class="flex gap-4">
-                <div class="glass-card px-6 py-4 rounded-xl flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-secondary">trending_up</span>
+            <div class="flex gap-3 sm:gap-4">
+                <div class="glass-card px-4 sm:px-6 py-3 sm:py-4 rounded-xl flex items-center gap-3 sm:gap-4 flex-1 sm:flex-none">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-secondary text-[18px] sm:text-[22px]">trending_up</span>
                     </div>
                     <div>
-                        <p class="text-[11px] uppercase tracking-wider text-on-surface-variant">Pemasukan</p>
-                        <p class="text-lg font-bold text-secondary">Rp {{ number_format($monthlyIncome, 0, ',', '.') }}</p>
+                        <p class="text-[10px] sm:text-[11px] uppercase tracking-wider text-on-surface-variant">Pemasukan</p>
+                        <p class="text-sm sm:text-lg font-bold text-secondary">Rp {{ number_format($monthlyIncome, 0, ',', '.') }}</p>
                     </div>
                 </div>
-                <div class="glass-card px-6 py-4 rounded-xl flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full bg-tertiary-container/10 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-tertiary-container">trending_down</span>
+                <div class="glass-card px-4 sm:px-6 py-3 sm:py-4 rounded-xl flex items-center gap-3 sm:gap-4 flex-1 sm:flex-none">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-tertiary-container/10 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-tertiary-container text-[18px] sm:text-[22px]">trending_down</span>
                     </div>
                     <div>
-                        <p class="text-[11px] uppercase tracking-wider text-on-surface-variant">Pengeluaran</p>
-                        <p class="text-lg font-bold text-tertiary-container">Rp {{ number_format($monthlyExpense, 0, ',', '.') }}</p>
+                        <p class="text-[10px] sm:text-[11px] uppercase tracking-wider text-on-surface-variant">Pengeluaran</p>
+                        <p class="text-sm sm:text-lg font-bold text-tertiary-container">Rp {{ number_format($monthlyExpense, 0, ',', '.') }}</p>
                     </div>
                 </div>
             </div>
@@ -30,9 +30,9 @@
     </section>
 
     <!-- Bento Grid -->
-    <div class="grid grid-cols-12 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
         <!-- Cashflow Chart -->
-        <div class="col-span-12 lg:col-span-8 bg-surface-container-low p-8 rounded-xl shadow-lg border border-white/5 relative overflow-hidden">
+        <div class="lg:col-span-8 bg-surface-container-low p-5 sm:p-8 rounded-xl shadow-lg border border-white/5 relative overflow-hidden">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-lg font-semibold">Arus Kas 7 Hari Terakhir</h3>
                 <div class="flex gap-4">
@@ -44,7 +44,7 @@
                     </span>
                 </div>
             </div>
-            <div class="relative h-64">
+            <div class="relative h-48 sm:h-56 md:h-64">
                 <canvas id="cashflowChart"></canvas>
             </div>
 
@@ -87,7 +87,7 @@
 
 
         <!-- Budget & Wallets -->
-        <div class="col-span-12 lg:col-span-4 space-y-6">
+        <div class="lg:col-span-4 space-y-4 md:space-y-6">
             <div class="bg-surface-container-low p-6 rounded-xl border border-white/5">
                 <h3 class="text-sm font-semibold mb-6">Analisis Anggaran</h3>
                 <div class="space-y-6">
@@ -131,42 +131,45 @@
     </div>
 
     <!-- Recent Transactions -->
-    <div class="mt-8">
-        <div class="bg-surface-container-low rounded-xl border border-white/5 overflow-hidden">
-            <div class="px-8 py-6 border-b border-white/5 flex justify-between items-center">
-                <h3 class="text-lg font-semibold">Transaksi Terakhir</h3>
+    <div class="mt-6 md:mt-8">
+        <div class="bg-surface-container-low rounded-xl border border-white/5">
+            <div class="px-4 sm:px-8 py-4 sm:py-6 border-b border-white/5 flex justify-between items-center">
+                <h3 class="text-base sm:text-lg font-semibold">Transaksi Terakhir</h3>
                 <div class="flex gap-4">
-                    <a href="{{ route('transactions') }}" class="px-4 py-1.5 text-xs rounded-full bg-surface-container-highest text-on-surface font-medium border border-white/5 hover:bg-surface-container-highest/80 transition-colors">Lihat Semua</a>
+                    <a href="{{ route('transactions') }}" class="px-3 sm:px-4 py-1.5 text-xs rounded-full bg-surface-container-highest text-on-surface font-medium border border-white/5 hover:bg-surface-container-highest/80 transition-colors">Lihat Semua</a>
                 </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
                         <tr class="text-left font-['Inter']">
-                            <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Aktivitas</th>
-                            <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Kategori</th>
-                            <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Tanggal</th>
-                            <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold text-right">Jumlah</th>
+                            <th class="px-4 sm:px-8 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Aktivitas</th>
+                            <th class="hidden sm:table-cell px-8 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Kategori</th>
+                            <th class="hidden md:table-cell px-8 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Tanggal</th>
+                            <th class="px-4 sm:px-8 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold text-right">Jumlah</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/5">
                         @forelse($recentTransactions as $transaction)
                         <tr class="hover:bg-white/5 transition-colors group cursor-pointer">
-                            <td class="px-8 py-5">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center group-hover:bg-surface-variant transition-colors">
-                                        <span class="material-symbols-outlined text-on-surface">{{ $transaction->category->icon ?? 'payments' }}</span>
+                            <td class="px-4 sm:px-8 py-4 sm:py-5">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-surface-container-highest flex items-center justify-center group-hover:bg-surface-variant transition-colors shrink-0">
+                                        <span class="material-symbols-outlined text-on-surface text-[18px]">{{ $transaction->category->icon ?? 'payments' }}</span>
                                     </div>
-                                    <span class="font-medium group-hover:text-primary transition-colors">{{ $transaction->description ?? 'Tanpa Deskripsi' }}</span>
+                                    <div class="min-w-0">
+                                        <span class="font-medium group-hover:text-primary transition-colors text-sm truncate block">{{ $transaction->description ?? 'Tanpa Deskripsi' }}</span>
+                                        <span class="sm:hidden text-[10px] text-on-surface-variant/60">{{ $transaction->date->format('d M Y') }}</span>
+                                    </div>
                                 </div>
                             </td>
-                            <td class="px-8 py-5">
+                            <td class="hidden sm:table-cell px-8 py-5">
                                 <span class="px-3 py-1 rounded-full bg-surface-container-highest text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
                                     {{ $transaction->category->name ?? 'Uncategorized' }}
                                 </span>
                             </td>
-                            <td class="px-8 py-5 text-sm text-on-surface-variant">{{ $transaction->date->format('d M Y') }}</td>
-                            <td class="px-8 py-5 text-right font-bold {{ $transaction->type === 'income' ? 'text-secondary' : 'text-tertiary-container' }}">
+                            <td class="hidden md:table-cell px-8 py-5 text-sm text-on-surface-variant">{{ $transaction->date->format('d M Y') }}</td>
+                            <td class="px-4 sm:px-8 py-4 sm:py-5 text-right font-bold text-sm {{ $transaction->type === 'income' ? 'text-secondary' : 'text-tertiary-container' }}">
                                 {{ $transaction->type === 'income' ? '+' : '-' }} Rp {{ number_format($transaction->amount, 0, ',', '.') }}
                             </td>
                         </tr>

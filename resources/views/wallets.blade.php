@@ -144,8 +144,8 @@
     <!-- Recent Transactions Preview -->
     <section class="mt-12">
         <h4 class="text-on-surface font-semibold text-lg mb-6 px-2">Aktivitas Terkini</h4>
-        <div class="bg-surface-container-low rounded-4xl border border-white/5 overflow-hidden shadow-2xl">
-            <div class="overflow-x-auto">
+        <div class="bg-surface-container-low rounded-4xl border border-white/5 shadow-2xl">
+            <div class="overflow-x-auto rounded-b-4xl">
                 <table class="w-full text-left">
                     <thead class="bg-white/5 border-b border-white/5">
                         <tr>

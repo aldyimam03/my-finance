@@ -46,8 +46,8 @@
         <!-- Transaction History -->
         <section class="space-y-6">
             <h4 class="text-xl font-bold tracking-tight px-2">Riwayat Transaksi Dompet</h4>
-            <div class="bg-surface-container-low rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
-                <div class="overflow-x-auto">
+            <div class="bg-surface-container-low rounded-3xl border border-white/5 shadow-2xl">
+                <div class="overflow-x-auto rounded-b-3xl">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-white/5 border-b border-white/5">

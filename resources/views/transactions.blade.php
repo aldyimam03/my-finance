@@ -194,8 +194,8 @@
 
     <!-- Transaction Table Section -->
     <section>
-        <div class="bg-surface-container-low rounded-xl border border-white/5 shadow-2xl overflow-hidden">
-            <div class="overflow-x-auto">
+        <div class="bg-surface-container-low rounded-xl border border-white/5 shadow-2xl">
+            <div class="overflow-x-auto rounded-b-xl">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-white/5 bg-white/5">

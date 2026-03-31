@@ -22,30 +22,67 @@
     @if(session('status') === 'password-updated') data-flash-success="Kata sandi berhasil diperbarui." @endif
     x-data="{
         isTransactionModalOpen: false,
-        sidebarOpen: localStorage.getItem('sidebarOpen') !== 'false',
+        /* Desktop: persist collapse. Mobile: always start closed */
+        sidebarOpen: window.innerWidth >= 1024 ? localStorage.getItem('sidebarOpen') !== 'false' : false,
+        mobileMenuOpen: false,
+        isMobile() { return window.innerWidth < 1024; },
         toggleSidebar() {
-            this.sidebarOpen = !this.sidebarOpen;
-            localStorage.setItem('sidebarOpen', this.sidebarOpen);
-        }
+            if (this.isMobile()) {
+                this.mobileMenuOpen = !this.mobileMenuOpen;
+            } else {
+                this.sidebarOpen = !this.sidebarOpen;
+                localStorage.setItem('sidebarOpen', this.sidebarOpen);
+            }
+        },
+        closeMobileMenu() { this.mobileMenuOpen = false; }
     }"
-    @keydown.escape="isTransactionModalOpen = false"
+    @keydown.escape="isTransactionModalOpen = false; mobileMenuOpen = false"
     :class="isTransactionModalOpen ? 'overflow-hidden' : ''"
 >
-    <!-- SideNavBar Shell -->
+    <!-- ===== Mobile Overlay Backdrop ===== -->
+    <div
+        x-show="mobileMenuOpen"
+        @click="closeMobileMenu()"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+        style="display:none"
+    ></div>
+
+    <!-- ===== SideNavBar ===== -->
     <aside
-        :class="sidebarOpen ? 'w-60' : 'w-[72px]'"
-        class="h-screen fixed left-0 top-0 border-r border-white/5 bg-surface-container-low flex flex-col py-6 z-50 shadow-2xl shadow-black/40 font-['Inter'] antialiased tracking-tight transition-[width] duration-300 overflow-hidden"
+        :class="{
+            /* Desktop collapsed/expanded */
+            'w-60': !isMobile() && sidebarOpen,
+            'w-[72px]': !isMobile() && !sidebarOpen,
+            /* Mobile: slide in/out */
+            'translate-x-0 w-72 shadow-2xl shadow-black/60': isMobile() && mobileMenuOpen,
+            '-translate-x-full w-72': isMobile() && !mobileMenuOpen,
+        }"
+        class="h-screen fixed left-0 top-0 border-r border-white/5 bg-surface-container-low flex flex-col py-6 z-50 font-['Inter'] antialiased tracking-tight transition-all duration-300 overflow-hidden"
     >
         <!-- Logo & Toggle -->
         <div class="flex items-center gap-3 mb-8 px-4 shrink-0">
             <button
                 @click="toggleSidebar()"
                 class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors shrink-0"
-                :title="sidebarOpen ? 'Tutup Sidebar' : 'Buka Sidebar'"
+                :title="sidebarOpen || mobileMenuOpen ? 'Tutup Sidebar' : 'Buka Sidebar'"
             >
-                <span class="material-symbols-outlined text-[20px] text-on-surface-variant transition-transform duration-300" :class="sidebarOpen ? 'rotate-0' : 'rotate-180'">menu_open</span>
+                <span class="material-symbols-outlined text-[20px] text-on-surface-variant transition-transform duration-300"
+                    :class="(sidebarOpen && !isMobile()) ? 'rotate-0' : 'rotate-180'">menu_open</span>
             </button>
-            <div x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200 delay-100" x-transition:enter-start="opacity-0 -translate-x-2" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="overflow-hidden">
+            <div x-show="sidebarOpen || mobileMenuOpen"
+                x-transition:enter="transition ease-out duration-200 delay-100"
+                x-transition:enter-start="opacity-0 -translate-x-2"
+                x-transition:enter-end="opacity-100 translate-x-0"
+                x-transition:leave="transition ease-in duration-100"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="overflow-hidden">
                 <h1 class="text-[15px] font-semibold tracking-tight text-[#e5e2e1] whitespace-nowrap">My Finance</h1>
                 <p class="text-[10px] uppercase tracking-[0.05em] text-on-surface-variant opacity-60 whitespace-nowrap">Obsidian Ledger</p>
             </div>
@@ -68,13 +105,20 @@
             @php $active = request()->routeIs($item['route']); @endphp
             <a
                 href="{{ route($item['route']) }}"
+                @click="if(isMobile()) closeMobileMenu()"
                 title="{{ $item['label'] }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative
                     {{ $active ? 'text-primary bg-primary/10 font-semibold' : 'text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5' }}"
             >
                 <span class="material-symbols-outlined text-[22px] shrink-0 {{ $active ? '[font-variation-settings:\'FILL\'_1]' : '' }}">{{ $item['icon'] }}</span>
-                <span x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200 delay-75" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="text-[14px] whitespace-nowrap overflow-hidden">{{ $item['label'] }}</span>
-                <!-- Active indicator -->
+                <span x-show="sidebarOpen || mobileMenuOpen"
+                    x-transition:enter="transition ease-out duration-200 delay-75"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-75"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="text-[14px] whitespace-nowrap overflow-hidden">{{ $item['label'] }}</span>
                 @if($active)
                 <span class="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-l-full"></span>
                 @endif
@@ -83,26 +127,27 @@
         </nav>
 
         <!-- Bottom Actions -->
-        <div class="px-2 pt-4 pb-2 space-y-0.5 border-t border-white/5 mt-2 shrink-0">
+        <div class="px-2 pt-4 pb-6 space-y-0.5 border-t border-white/5 mt-2 shrink-0">
             <!-- Tambah Transaksi -->
             <button
-                @click="isTransactionModalOpen = true"
+                @click="isTransactionModalOpen = true; if(isMobile()) closeMobileMenu()"
                 class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary transition-all font-semibold group"
                 title="Tambah Transaksi"
             >
                 <span class="material-symbols-outlined text-[22px] shrink-0">add_circle</span>
-                <span x-show="sidebarOpen" class="text-[14px] whitespace-nowrap overflow-hidden">Tambah Transaksi</span>
+                <span x-show="sidebarOpen || mobileMenuOpen" class="text-[14px] whitespace-nowrap overflow-hidden">Tambah Transaksi</span>
             </button>
 
             <!-- Pengaturan -->
             <a
                 href="{{ route('settings') }}"
+                @click="if(isMobile()) closeMobileMenu()"
                 title="Pengaturan"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                     {{ request()->routeIs('settings') ? 'text-primary bg-primary/10 font-semibold' : 'text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5' }}"
             >
                 <span class="material-symbols-outlined text-[22px] shrink-0 {{ request()->routeIs('settings') ? '[font-variation-settings:\'FILL\'_1]' : '' }}">settings</span>
-                <span x-show="sidebarOpen" class="text-[14px] whitespace-nowrap overflow-hidden">Pengaturan</span>
+                <span x-show="sidebarOpen || mobileMenuOpen" class="text-[14px] whitespace-nowrap overflow-hidden">Pengaturan</span>
             </a>
 
             <!-- Keluar -->
@@ -114,22 +159,39 @@
                     class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#e5e2e1]/50 hover:text-tertiary-container hover:bg-tertiary-container/10 transition-all duration-200 text-left cursor-pointer"
                 >
                     <span class="material-symbols-outlined text-[22px] shrink-0">logout</span>
-                    <span x-show="sidebarOpen" class="text-[14px] whitespace-nowrap overflow-hidden">Keluar</span>
+                    <span x-show="sidebarOpen || mobileMenuOpen" class="text-[14px] whitespace-nowrap overflow-hidden">Keluar</span>
                 </button>
             </form>
         </div>
     </aside>
 
-    <!-- TopNavBar Shell -->
+    <!-- ===== TopNavBar ===== -->
     <header
-        :class="sidebarOpen ? 'left-60' : 'left-[72px]'"
-        class="fixed top-0 right-0 h-16 bg-[#353534]/40 backdrop-blur-md border-b border-white/5 flex justify-between items-center px-8 z-40 shadow-lg shadow-black/20 font-['Inter'] transition-[left] duration-300"
+        :class="{
+            'left-60': !isMobile() && sidebarOpen,
+            'left-[72px]': !isMobile() && !sidebarOpen,
+            'left-0': isMobile(),
+        }"
+        class="fixed top-0 right-0 h-16 bg-[#353534]/40 backdrop-blur-md border-b border-white/5 flex justify-between items-center px-4 md:px-8 z-40 shadow-lg shadow-black/20 font-['Inter'] transition-[left] duration-300"
     >
-        <div class="flex items-center gap-4 bg-surface-container-lowest/50 px-4 py-2 rounded-full border border-white/5 focus-within:ring-1 focus-within:ring-[#adc6ff]/50 transition-all w-96">
-            <span class="material-symbols-outlined text-on-surface-variant text-xl" data-icon="search">search</span>
-            <input class="bg-transparent border-none focus:ring-0 text-sm w-full text-on-surface placeholder:text-on-surface-variant/50 outline-none" placeholder="Cari transaksi atau laporan..." type="text" />
+        <!-- Mobile hamburger + Search -->
+        <div class="flex items-center gap-3 flex-1 min-w-0">
+            <!-- Hamburger (mobile only) -->
+            <button
+                @click="toggleSidebar()"
+                class="lg:hidden w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors shrink-0"
+            >
+                <span class="material-symbols-outlined text-[20px] text-on-surface-variant">menu</span>
+            </button>
+
+            <!-- Search bar — hidden on small phones, visible tablet+ -->
+            <div class="hidden sm:flex items-center gap-4 bg-surface-container-lowest/50 px-4 py-2 rounded-full border border-white/5 focus-within:ring-1 focus-within:ring-[#adc6ff]/50 transition-all w-full max-w-xs lg:max-w-md">
+                <span class="material-symbols-outlined text-on-surface-variant text-xl shrink-0">search</span>
+                <input class="bg-transparent border-none focus:ring-0 text-sm w-full text-on-surface placeholder:text-on-surface-variant/50 outline-none" placeholder="Cari transaksi atau laporan..." type="text" />
+            </div>
         </div>
-        <div class="flex items-center gap-6">
+
+        <div class="flex items-center gap-3 md:gap-6 shrink-0">
             <!-- Notification Bell with Dropdown -->
             <div class="relative" x-data="{ notifOpen: false }" @click.outside="notifOpen = false">
                 <button
@@ -144,7 +206,7 @@
                     @endif
                 </button>
 
-                <!-- Dropdown Panel -->
+                <!-- Dropdown Panel — responsive width -->
                 <div
                     x-show="notifOpen"
                     x-transition:enter="transition ease-out duration-200"
@@ -153,7 +215,7 @@
                     x-transition:leave="transition ease-in duration-150"
                     x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                     x-transition:leave-end="opacity-0 scale-95 -translate-y-2"
-                    class="absolute right-0 top-full mt-3 w-96 bg-surface-container-low border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden z-50"
+                    class="absolute right-0 top-full mt-3 w-[calc(100vw-2rem)] sm:w-96 bg-surface-container-low border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden z-50"
                     style="display:none"
                 >
                     <!-- Header -->
@@ -237,8 +299,9 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-3 pl-6 border-l border-white/10">
-                <div class="text-right">
+            <!-- User Profile — hide email on mobile -->
+            <div class="flex items-center gap-2 md:gap-3 pl-3 md:pl-6 border-l border-white/10">
+                <div class="text-right hidden md:block">
                     <p class="text-xs font-semibold">{{ Auth::user()->name ?? 'Guest' }}</p>
                     <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">{{ Auth::user()->email ?? 'guest@example.com' }}</p>
                 </div>
@@ -247,16 +310,20 @@
         </div>
     </header>
 
-    <!-- Main Content -->
+    <!-- ===== Main Content ===== -->
     <main
-        :class="sidebarOpen ? 'ml-60' : 'ml-[72px]'"
-        class="pt-24 px-10 pb-12 bg-surface min-h-screen transition-[margin-left] duration-300"
+        :class="{
+            'ml-60': !isMobile() && sidebarOpen,
+            'ml-[72px]': !isMobile() && !sidebarOpen,
+            'ml-0': isMobile(),
+        }"
+        class="pt-20 px-4 sm:px-6 lg:px-10 pb-24 bg-surface min-h-screen transition-[margin-left] duration-300"
     >
         {{ $slot }}
     </main>
 
     <!-- Global FAB -->
-    <button @click="isTransactionModalOpen = true" class="fixed bottom-8 right-8 w-14 h-14 bg-linear-to-br from-primary to-primary-container text-on-primary rounded-full shadow-2xl shadow-primary/40 flex items-center justify-center group active:scale-95 transition-all hover:opacity-90 z-40">
+    <button @click="isTransactionModalOpen = true" class="fixed bottom-6 right-6 w-14 h-14 bg-linear-to-br from-primary to-primary-container text-on-primary rounded-full shadow-2xl shadow-primary/40 flex items-center justify-center group active:scale-95 transition-all hover:opacity-90 z-40">
         <span class="material-symbols-outlined text-3xl transition-transform group-hover:rotate-90" data-icon="add">add</span>
     </button>
 

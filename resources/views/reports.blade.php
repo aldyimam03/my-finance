@@ -168,8 +168,8 @@
         {{-- Semua Transaksi Bulan Ini --}}
         <section>
             <h3 class="text-xl font-semibold mb-6">Semua Transaksi Bulan Ini</h3>
-            <div class="bg-surface-container-low rounded-4xl border border-white/5 overflow-hidden">
-                <div class="overflow-x-auto">
+            <div class="bg-surface-container-low rounded-4xl border border-white/5">
+                <div class="overflow-x-auto rounded-b-4xl">
                     <table class="w-full text-left">
                         <thead class="bg-white/5 border-b border-white/5">
                             <tr>

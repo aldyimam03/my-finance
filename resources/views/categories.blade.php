@@ -36,7 +36,7 @@
         </div>
 
         <!-- Daftar Kategori -->
-        <div class="bg-surface-container-low border border-white/5 rounded-3xl overflow-hidden">
+        <div class="bg-surface-container-low border border-white/5 rounded-3xl">
             <div class="px-6 py-4 border-b border-white/5 flex items-center gap-3">
                 <span class="material-symbols-outlined text-on-surface-variant">label</span>
                 <h3 class="font-semibold text-sm">Semua Kategori</h3>
