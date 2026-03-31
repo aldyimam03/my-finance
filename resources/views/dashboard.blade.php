@@ -37,10 +37,10 @@
                 <h3 class="text-lg font-semibold">Arus Kas 7 Hari Terakhir</h3>
                 <div class="flex gap-4">
                     <span class="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-secondary font-bold">
-                        <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_rgba(78,222,163,0.5)]"></span> Income
+                        <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_rgba(78,222,163,0.5)]"></span> Pemasukan
                     </span>
                     <span class="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-tertiary-container font-bold">
-                        <span class="w-2 h-2 rounded-full bg-tertiary-container shadow-[0_0_8px_rgba(255,81,106,0.5)]"></span> Expense
+                        <span class="w-2 h-2 rounded-full bg-tertiary-container shadow-[0_0_8px_rgba(255,81,106,0.5)]"></span> Pengeluaran
                     </span>
                 </div>
             </div>

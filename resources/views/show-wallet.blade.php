@@ -15,7 +15,7 @@
                     <span class="material-symbols-outlined text-[20px]">edit</span>
                     Edit
                 </a>
-                <form action="{{ route('wallets.destroy', $wallet) }}" method="POST" onsubmit="return confirm('Hapus dompet ini?')">
+                <form action="{{ route('wallets.destroy', $wallet) }}" method="POST" data-confirm="Dompet '{{ $wallet->name }}' akan dihapus permanen beserta seluruh riwayat transaksinya. Lanjutkan?">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="px-6 py-3 bg-tertiary-container/10 hover:bg-tertiary-container text-tertiary-container hover:text-on-tertiary-container font-bold rounded-xl transition-all border border-tertiary-container/20 flex items-center gap-2">

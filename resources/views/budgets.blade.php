@@ -1,11 +1,4 @@
 <x-app-layout title="Manajemen Anggaran - My Finance">
-    @if(session('success'))
-    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
-        class="fixed top-6 right-6 z-[100] bg-secondary/20 border border-secondary/30 text-secondary px-6 py-4 rounded-2xl shadow-xl backdrop-blur-md text-sm font-semibold flex items-center gap-3">
-        <span class="material-symbols-outlined text-lg">check_circle</span>
-        {{ session('success') }}
-    </div>
-    @endif
 
     <div class="max-w-[1400px] mx-auto space-y-12" x-data="{
         showAddModal: false,
@@ -114,7 +107,7 @@
                                         <span class="material-symbols-outlined text-sm">edit</span>
                                     </button>
                                     <form action="{{ route('budgets.destroy', $budget['id']) }}" method="POST"
-                                        onsubmit="return confirm('Hapus anggaran ini?')">
+                                    data-confirm="Anggaran ini akan dihapus permanen. Lanjutkan?">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"

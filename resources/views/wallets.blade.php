@@ -1,11 +1,4 @@
 <x-app-layout title="Dompet & Aset - My Finance">
-    @if(session('success'))
-    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
-        class="fixed top-6 right-6 z-[100] bg-secondary/20 border border-secondary/30 text-secondary px-6 py-4 rounded-2xl shadow-xl backdrop-blur-md text-sm font-semibold flex items-center gap-3">
-        <span class="material-symbols-outlined text-lg">check_circle</span>
-        {{ session('success') }}
-    </div>
-    @endif
 
     <!-- Header Section -->
     <section class="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
@@ -117,7 +110,7 @@
                                 <span class="material-symbols-outlined text-[20px]">edit</span>
                             </a>
                             <!-- Delete -->
-                            <form action="{{ route('wallets.destroy', $wallet) }}" method="POST" onsubmit="return confirm('Hapus dompet ini?')" class="inline">
+                            <form action="{{ route('wallets.destroy', $wallet) }}" method="POST" data-confirm="Dompet '{{ $wallet->name }}' akan dihapus permanen. Lanjutkan?" class="inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-on-surface-variant/40 hover:text-tertiary-container transition-colors" title="Hapus">

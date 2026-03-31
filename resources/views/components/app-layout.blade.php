@@ -14,6 +14,12 @@
 
 <body
     class="bg-surface text-on-surface font-body selection:bg-primary/30"
+    @if(session('success')) data-flash-success="{{ session('success') }}" @endif
+    @if(session('error'))   data-flash-error="{{ session('error') }}"     @endif
+    @if(session('warning')) data-flash-warning="{{ session('warning') }}" @endif
+    @if(session('info'))    data-flash-info="{{ session('info') }}"       @endif
+    @if(session('status') === 'profile-updated')  data-flash-success="Profil berhasil diperbarui."  @endif
+    @if(session('status') === 'password-updated') data-flash-success="Kata sandi berhasil diperbarui." @endif
     x-data="{
         isTransactionModalOpen: false,
         sidebarOpen: localStorage.getItem('sidebarOpen') !== 'false',

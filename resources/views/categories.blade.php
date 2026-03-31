@@ -1,11 +1,4 @@
 <x-app-layout title="Kategori - My Finance">
-    @if(session('success'))
-    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
-        class="fixed top-6 right-6 z-[100] bg-secondary/20 border border-secondary/30 text-secondary px-6 py-4 rounded-2xl shadow-xl backdrop-blur-md text-sm font-semibold flex items-center gap-3">
-        <span class="material-symbols-outlined text-lg">check_circle</span>
-        {{ session('success') }}
-    </div>
-    @endif
 
     <div x-data="{
         showAddModal: false,
@@ -65,7 +58,7 @@
                         </button>
                         @if($cat->transactions()->count() === 0)
                         <form action="{{ route('categories.destroy', $cat) }}" method="POST"
-                            onsubmit="return confirm('Hapus kategori \'{{ $cat->name }}\'?')">
+                            onsubmit="return false" data-confirm="Hapus kategori &apos;{{ $cat->name }}&apos;? Tindakan ini tidak bisa dibatalkan.">
                             @csrf
                             @method('DELETE')
                             <button type="submit"

@@ -1,11 +1,4 @@
 <x-app-layout title="Transaksi - My Finance">
-    @if(session('success'))
-    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
-        class="fixed top-6 right-6 z-[100] bg-secondary/20 border border-secondary/30 text-secondary px-6 py-4 rounded-2xl shadow-xl backdrop-blur-md text-sm font-semibold flex items-center gap-3">
-        <span class="material-symbols-outlined text-lg">check_circle</span>
-        {{ session('success') }}
-    </div>
-    @endif
 
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12"
@@ -252,7 +245,7 @@
                             </td>
                             <td class="px-8 py-5 text-right">
                                 <form action="{{ route('transactions.destroy', $transaction) }}" method="POST"
-                                    onsubmit="return confirm('Hapus transaksi ini? Saldo dompet akan dikembalikan.')">
+                                    data-confirm="Transaksi ini akan dihapus dan saldo dompet akan dikembalikan. Lanjutkan?">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
