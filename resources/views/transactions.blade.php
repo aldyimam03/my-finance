@@ -36,28 +36,30 @@
             }
         }">
     <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8 mb-8 md:mb-12">
         <div>
             <span class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant block mb-2">Manajemen Keuangan</span>
             <h2 class="font-['Inter'] text-3xl font-bold tracking-tight text-on-surface">Daftar Transaksi</h2>
         </div>
-        <div class="flex gap-4 items-center">
-            <div class="bg-surface-container-low px-8 py-4 rounded-xl shadow-lg border border-white/5 min-w-[200px]">
+        <div class="w-full md:w-auto flex flex-col gap-3 md:gap-4">
+            <div class="grid grid-cols-2 gap-3 md:flex md:gap-4 md:items-center">
+            <div class="bg-surface-container-low px-4 py-4 sm:px-6 rounded-xl shadow-lg border border-white/5 min-w-0">
                 <span class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-secondary/70 block mb-1">Total Pemasukan</span>
                 <div class="flex items-baseline gap-1">
                     <span class="text-xs text-secondary/60">Rp</span>
-                    <span class="text-2xl font-bold text-secondary">{{ number_format(auth()->user()->transactions()->where('type','income')->whereMonth('date', now()->month)->sum('amount'), 0, ',', '.') }}</span>
+                    <span class="text-lg sm:text-2xl font-bold text-secondary break-all">{{ number_format(auth()->user()->transactions()->where('type','income')->whereMonth('date', now()->month)->sum('amount'), 0, ',', '.') }}</span>
                 </div>
             </div>
-            <div class="bg-surface-container-low px-8 py-4 rounded-xl shadow-lg border border-white/5 min-w-[200px]">
+            <div class="bg-surface-container-low px-4 py-4 sm:px-6 rounded-xl shadow-lg border border-white/5 min-w-0">
                 <span class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-tertiary-container/70 block mb-1">Total Pengeluaran</span>
                 <div class="flex items-baseline gap-1">
                     <span class="text-xs text-tertiary-container/60">Rp</span>
-                    <span class="text-2xl font-bold text-tertiary-container">{{ number_format(auth()->user()->transactions()->where('type','expense')->whereMonth('date', now()->month)->sum('amount'), 0, ',', '.') }}</span>
+                    <span class="text-lg sm:text-2xl font-bold text-tertiary-container break-all">{{ number_format(auth()->user()->transactions()->where('type','expense')->whereMonth('date', now()->month)->sum('amount'), 0, ',', '.') }}</span>
                 </div>
             </div>
+            </div>
             <button @click="showModal = true"
-                class="px-6 py-4 bg-primary text-on-primary font-bold rounded-xl flex items-center gap-3 shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap">
+                class="w-full md:w-auto px-5 py-4 bg-primary text-on-primary font-bold rounded-xl flex items-center justify-center gap-3 shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap">
                 <span class="material-symbols-outlined">add</span>
                 Tambah Transaksi
             </button>

@@ -62,7 +62,7 @@
         
         <!-- Submit Button -->
         <button
-            class="w-full py-4 bg-gradient-to-r from-primary to-primary-container text-on-primary font-semibold rounded-xl shadow-lg shadow-primary/20 hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4"
+            class="w-full py-4 accent-gradient text-[#07111f] font-semibold rounded-xl shadow-lg shadow-primary/20 hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4"
             type="submit">
             Masuk
             <span class="material-symbols-outlined text-xl" data-icon="arrow_forward">arrow_forward</span>

@@ -118,7 +118,7 @@
                         
                         <!-- Actions -->
                         <div class="pt-6 flex flex-col gap-3">
-                            <button type="submit" class="w-full py-4 rounded-xl bg-linear-to-br from-primary to-primary-container text-on-primary-container font-bold tracking-wide hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20">
+                            <button type="submit" class="w-full py-4 rounded-xl accent-gradient text-[#07111f] font-bold tracking-wide hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20">
                                 Simpan Transaksi
                             </button>
                             <button type="button" @click="isTransactionModalOpen = false" class="w-full py-3 rounded-xl text-center text-sm font-medium text-on-surface-variant hover:text-white hover:bg-surface-container-highest transition-colors">
