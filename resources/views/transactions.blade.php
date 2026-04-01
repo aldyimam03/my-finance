@@ -224,9 +224,9 @@
     @endphp
     <section>
         <div class="bg-surface-container-low rounded-xl border border-white/5 shadow-2xl">
-            <div class="overflow-x-auto rounded-t-xl">
+            <div class="overflow-x-auto rounded-b-xl">
                 <table class="w-full text-left border-collapse">
-                    <thead class="sticky top-0 z-10">
+                    <thead>
                         <tr class="border-b border-white/5 bg-surface-container">
                             <th class="px-6 py-5 w-16 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold text-center">No</th>
                             <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">
@@ -274,18 +274,18 @@
                                     </div>
                                 </div>
                             </th>
-                            <th class="px-8 py-5"></th>
+                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <span>Aksi</span>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
-                </table>
-            </div>
-            <div class="max-h-[760px] overflow-y-auto rounded-b-xl">
-                <table class="w-full text-left border-collapse">
                     <tbody class="divide-y divide-white/5">
                         @forelse($transactions as $transaction)
                         <tr class="hover:bg-white/5 transition-colors group cursor-pointer">
                             <td class="px-6 py-5 text-center text-sm text-on-surface-variant/70 whitespace-nowrap">
-                                {{ $loop->iteration }}
+                                {{ $transactions->firstItem() + $loop->index }}
                             </td>
                             <td class="px-8 py-5 text-sm text-on-surface/80 whitespace-nowrap">
                                 {{ $transaction->date->format('d M Y') }}
@@ -347,18 +347,18 @@
             </div>
 
             <!-- Pagination -->
-            @if(false)
+            @if($transactions->hasPages())
             <div class="px-8 py-6 border-t border-white/5 flex items-center justify-between">
                 <span class="text-xs text-on-surface-variant">
-                    Menampilkan {{ $transactions->firstItem() }}–{{ $transactions->lastItem() }} dari {{ $transactions->total() }} transaksi
+                    Menampilkan {{ $transactions->firstItem() }} – {{ $transactions->lastItem() }} dari {{ $transactions->total() }} transaksi
                 </span>
                 <div class="text-sm text-on-surface-variant">
-                    {{ $transactions->withQueryString()->links() }}
+                    {{ $transactions->withQueryString()->links('components.pagination') }}
                 </div>
             </div>
             @else
             <div class="px-8 py-4 border-t border-white/5">
-                <span class="text-xs text-on-surface-variant">{{ $transactions->count() }} transaksi</span>
+                <span class="text-xs text-on-surface-variant">{{ $transactions->total() }} transaksi</span>
             </div>
             @endif
         </div>

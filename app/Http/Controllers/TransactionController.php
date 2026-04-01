@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -51,6 +52,21 @@ class TransactionController extends Controller
                 descending: $sortDir === 'desc'
             )
             ->values();
+
+        $perPage = 10;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $currentItems = $transactions->slice(($currentPage - 1) * $perPage, $perPage)->values();
+        $transactions = new LengthAwarePaginator(
+            $currentItems,
+            $transactions->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
+
         $wallets = Auth::user()->wallets()->get();
         $categories = Auth::user()->categories()->get();
 
