@@ -1,4 +1,4 @@
-<x-guest-layout title="Login - My Finance">
+<x-guest-layout title="Login - My Finance" :stats="$stats ?? []">
     <div class="mb-10">
         <h2 class="text-3xl font-semibold text-on-surface mb-2 tracking-tight">Selamat Datang</h2>
         <p class="text-on-surface-variant body-md">Silakan masuk ke akun Obsidian Ledger Anda.</p>

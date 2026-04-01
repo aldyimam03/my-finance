@@ -1,3 +1,4 @@
+@props(['title' => 'My Finance - Obsidian Ledger', 'stats' => []])
 <!DOCTYPE html>
 <html class="dark" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -49,20 +50,31 @@
                     </p>
                 </div>
                 <!-- Subtle Data Point Visualization (Signature Component) -->
-                <div class="obsidian-glass p-8 rounded-xl flex items-center justify-between gap-8 max-w-sm">
-                    <div>
-                        <span
-                            class="block text-[11px] uppercase tracking-[0.1em] text-on-surface-variant mb-1">Portfolio
-                            Aktif</span>
-                        <span class="text-2xl font-bold text-secondary">IDR 2.4B</span>
+                @php
+                    $s = $stats ?? ['users' => 0, 'transactions' => 0, 'totalAssets' => 0];
+
+                    // Format angka ringkas
+                    $fmtNum = fn($n) => $n >= 1_000_000 ? number_format($n/1_000_000, 1, ',', '.').'M'
+                                      : ($n >= 1_000 ? number_format($n/1_000, 1, ',', '.').'K'
+                                      : $n);
+                    $fmtRp  = fn($n) => $n >= 1_000_000_000 ? 'Rp '.number_format($n/1_000_000_000, 1, ',', '.').'B'
+                                      : ($n >= 1_000_000 ? 'Rp '.number_format($n/1_000_000, 1, ',', '.').'M'
+                                      : 'Rp '.number_format($n/1_000, 0, ',', '.').'K');
+
+                    $platformStats = [
+                        ['icon' => 'group',              'label' => 'Pengguna Aktif',       'value' => $fmtNum($s['users'])],
+                        ['icon' => 'receipt_long',       'label' => 'Transaksi Tercatat',   'value' => $fmtNum($s['transactions'])],
+                        ['icon' => 'account_balance',    'label' => 'Total Aset Dikelola',  'value' => $fmtRp($s['totalAssets'])],
+                    ];
+                @endphp
+                <div class="grid grid-cols-3 gap-3 max-w-sm">
+                    @foreach($platformStats as $stat)
+                    <div class="obsidian-glass rounded-xl p-4 flex flex-col gap-2">
+                        <span class="material-symbols-outlined text-[18px] text-primary opacity-70" style="font-variation-settings:'FILL' 1">{{ $stat['icon'] }}</span>
+                        <span class="text-lg font-bold text-on-surface leading-tight">{{ $stat['value'] }}</span>
+                        <span class="text-[9px] uppercase tracking-[0.08em] text-on-surface-variant/60 leading-tight">{{ $stat['label'] }}</span>
                     </div>
-                    <div class="flex gap-1 items-end h-8">
-                        <div class="w-1 bg-secondary rounded-full h-1/2 opacity-40"></div>
-                        <div class="w-1 bg-secondary rounded-full h-2/3 opacity-60"></div>
-                        <div class="w-1 bg-secondary rounded-full h-full"></div>
-                        <div class="w-1 bg-secondary rounded-full h-4/5"></div>
-                        <div class="w-1 bg-secondary rounded-full h-full opacity-80"></div>
-                    </div>
+                    @endforeach
                 </div>
             </div>
             <!-- Branding Subtle Footer -->

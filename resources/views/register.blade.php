@@ -1,4 +1,4 @@
-<x-guest-layout title="Register - My Finance">
+<x-guest-layout title="Register - My Finance" :stats="$stats ?? []">
     <div class="mb-10">
         <h2 class="text-3xl font-semibold text-on-surface mb-2 tracking-tight">Buat Akun Baru</h2>
         <p class="text-on-surface-variant body-md">Lengkapi detail di bawah untuk memulai pengelolaan aset Anda secara profesional.</p>

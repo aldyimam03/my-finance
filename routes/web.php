@@ -10,14 +10,28 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\ReportController;
 
+use App\Models\Transaction;
+use App\Models\User;
+use App\Models\Wallet;
+
 Route::middleware('guest')->group(function () {
     Route::get('/', function () {
-        return view('welcome');
+        $stats = [
+            'users'        => User::count(),
+            'transactions' => Transaction::count(),
+            'totalAssets'  => Wallet::sum('balance'),
+        ];
+        return view('welcome', compact('stats'));
     })->name('login');
     Route::post('/login', [AuthController::class, 'login']);
 
     Route::get('/register', function () {
-        return view('register');
+        $stats = [
+            'users'        => User::count(),
+            'transactions' => Transaction::count(),
+            'totalAssets'  => Wallet::sum('balance'),
+        ];
+        return view('register', compact('stats'));
     })->name('register');
     Route::post('/register', [AuthController::class, 'register']);
 });
