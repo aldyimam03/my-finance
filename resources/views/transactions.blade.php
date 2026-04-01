@@ -1,8 +1,5 @@
 <x-app-layout title="Transaksi - My Finance">
-
-    <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12"
-        x-data="{
+    <div x-data="{
             showModal: false,
             showEditModal: false,
             type: 'expense',
@@ -38,6 +35,8 @@
                 this.showEditModal = true;
             }
         }">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
         <div>
             <span class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant block mb-2">Manajemen Keuangan</span>
             <h2 class="font-['Inter'] text-3xl font-bold tracking-tight text-on-surface">Daftar Transaksi</h2>
@@ -490,7 +489,7 @@
                                             'description' => $transaction->description,
                                             'date' => $transaction->date->format('Y-m-d'),
                                         ]))"
-                                        class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-primary/10 rounded-lg text-on-surface-variant/40 hover:text-primary">
+                                        class="opacity-100 md:opacity-70 md:group-hover:opacity-100 transition-opacity p-2 hover:bg-primary/10 rounded-lg text-on-surface-variant/60 hover:text-primary">
                                         <span class="material-symbols-outlined text-sm">edit</span>
                                     </button>
                                     <form action="{{ route('transactions.destroy', $transaction) }}" method="POST"
@@ -498,7 +497,7 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
-                                            class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-tertiary-container/10 rounded-lg text-on-surface-variant/40 hover:text-tertiary-container">
+                                            class="opacity-100 md:opacity-70 md:group-hover:opacity-100 transition-opacity p-2 hover:bg-tertiary-container/10 rounded-lg text-on-surface-variant/60 hover:text-tertiary-container">
                                             <span class="material-symbols-outlined text-sm">delete</span>
                                         </button>
                                     </form>
@@ -567,4 +566,5 @@
         </div>
     </section>
     @endif
+    </div>
 </x-app-layout>
