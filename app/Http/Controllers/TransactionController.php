@@ -7,6 +7,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class TransactionController extends Controller
 {
@@ -75,33 +76,44 @@ class TransactionController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'wallet_id' => 'required|exists:wallets,id',
-            'category_id' => 'nullable|exists:categories,id',
-            'to_wallet_id' => 'required_if:type,transfer|nullable|exists:wallets,id',
-            'type' => 'required|in:income,expense,transfer',
-            'amount' => 'required|numeric|min:0.01',
-            'description' => 'nullable|string|max:255',
-            'date' => 'required|date',
-        ]);
+        $validated = $this->validateTransaction($request);
 
         $wallet = Auth::user()->wallets()->findOrFail($validated['wallet_id']);
 
         DB::transaction(function () use ($validated, $wallet) {
             $transaction = Auth::user()->transactions()->create($validated);
 
-            if ($validated['type'] === 'income') {
-                $wallet->increment('balance', $validated['amount']);
-            } elseif ($validated['type'] === 'expense') {
-                $wallet->decrement('balance', $validated['amount']);
-            } elseif ($validated['type'] === 'transfer') {
-                $toWallet = Auth::user()->wallets()->findOrFail($validated['to_wallet_id']);
-                $wallet->decrement('balance', $validated['amount']);
-                $toWallet->increment('balance', $validated['amount']);
-            }
+            $this->applyTransactionEffect($transaction, $wallet, $validated['to_wallet_id'] ? Auth::user()->wallets()->findOrFail($validated['to_wallet_id']) : null);
         });
 
         return redirect()->back()->with('success', 'Transaksi berhasil dicatat.');
+    }
+
+    public function update(Request $request, Transaction $transaction)
+    {
+        $this->authorize('update', $transaction);
+
+        $validated = $this->validateTransaction($request, $transaction);
+
+        DB::transaction(function () use ($transaction, $validated) {
+            $oldWallet = Auth::user()->wallets()->findOrFail($transaction->wallet_id);
+            $oldToWallet = $transaction->to_wallet_id
+                ? Auth::user()->wallets()->findOrFail($transaction->to_wallet_id)
+                : null;
+
+            $this->revertTransactionEffect($transaction, $oldWallet, $oldToWallet);
+
+            $transaction->update($validated);
+
+            $newWallet = Auth::user()->wallets()->findOrFail($transaction->wallet_id);
+            $newToWallet = $transaction->to_wallet_id
+                ? Auth::user()->wallets()->findOrFail($transaction->to_wallet_id)
+                : null;
+
+            $this->applyTransactionEffect($transaction, $newWallet, $newToWallet);
+        });
+
+        return redirect()->back()->with('success', 'Transaksi berhasil diperbarui.');
     }
 
     public function destroy(Transaction $transaction)
@@ -110,20 +122,92 @@ class TransactionController extends Controller
 
         DB::transaction(function () use ($transaction) {
             $wallet = $transaction->wallet;
+            $toWallet = $transaction->toWallet;
 
-            if ($transaction->type === 'income') {
-                $wallet->decrement('balance', $transaction->amount);
-            } elseif ($transaction->type === 'expense') {
-                $wallet->increment('balance', $transaction->amount);
-            } elseif ($transaction->type === 'transfer') {
-                $toWallet = $transaction->toWallet;
-                $wallet->increment('balance', $transaction->amount);
-                $toWallet->decrement('balance', $transaction->amount);
-            }
+            $this->revertTransactionEffect($transaction, $wallet, $toWallet);
 
             $transaction->delete();
         });
 
         return redirect()->back()->with('success', 'Transaksi berhasil dihapus.');
+    }
+
+    private function validateTransaction(Request $request, ?Transaction $transaction = null): array
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'wallet_id' => [
+                'required',
+                Rule::exists('wallets', 'id')->where('user_id', $user->id),
+            ],
+            'category_id' => [
+                'nullable',
+                Rule::exists('categories', 'id')->where('user_id', $user->id),
+            ],
+            'to_wallet_id' => [
+                'required_if:type,transfer',
+                'nullable',
+                Rule::exists('wallets', 'id')->where('user_id', $user->id),
+            ],
+            'type' => 'required|in:income,expense,transfer',
+            'amount' => 'required|numeric|min:0.01',
+            'description' => 'nullable|string|max:255',
+            'date' => 'required|date',
+        ]);
+
+        if ($validated['type'] !== 'transfer') {
+            $validated['to_wallet_id'] = null;
+        }
+
+        if ($validated['type'] === 'transfer') {
+            $validated['category_id'] = null;
+        }
+
+        if (
+            $validated['type'] === 'transfer'
+            && isset($validated['to_wallet_id'])
+            && (int) $validated['wallet_id'] === (int) $validated['to_wallet_id']
+        ) {
+            abort(422, 'Dompet tujuan transfer harus berbeda.');
+        }
+
+        return $validated;
+    }
+
+    private function applyTransactionEffect(Transaction $transaction, $wallet, $toWallet = null): void
+    {
+        if ($transaction->type === 'income') {
+            $wallet->increment('balance', $transaction->amount);
+            return;
+        }
+
+        if ($transaction->type === 'expense') {
+            $wallet->decrement('balance', $transaction->amount);
+            return;
+        }
+
+        if ($transaction->type === 'transfer' && $toWallet) {
+            $wallet->decrement('balance', $transaction->amount);
+            $toWallet->increment('balance', $transaction->amount);
+        }
+    }
+
+    private function revertTransactionEffect(Transaction $transaction, $wallet, $toWallet = null): void
+    {
+        if ($transaction->type === 'income') {
+            $wallet->decrement('balance', $transaction->amount);
+            return;
+        }
+
+        if ($transaction->type === 'expense') {
+            $wallet->increment('balance', $transaction->amount);
+            return;
+        }
+
+        if ($transaction->type === 'transfer' && $toWallet) {
+            $wallet->increment('balance', $transaction->amount);
+            $toWallet->decrement('balance', $transaction->amount);
+        }
     }
 }

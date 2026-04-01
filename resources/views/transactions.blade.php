@@ -4,14 +4,38 @@
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12"
         x-data="{
             showModal: false,
+            showEditModal: false,
             type: 'expense',
             amountRaw: '',
             amountDisplay: '',
+            editType: 'expense',
+            editAmountRaw: '',
+            editAmountDisplay: '',
+            editTransaction: { id: null, wallet_id: '', category_id: '', to_wallet_id: '', description: '', date: '', type: 'expense' },
             wallets: {{ $wallets->toJson() }},
             categories: {{ $categories->toJson() }},
             setAmount(value) {
                 this.amountRaw = window.financeNumber.sanitize(value);
                 this.amountDisplay = window.financeNumber.format(this.amountRaw);
+            },
+            setEditAmount(value) {
+                this.editAmountRaw = window.financeNumber.sanitize(value);
+                this.editAmountDisplay = window.financeNumber.format(this.editAmountRaw);
+            },
+            openEditModal(transaction) {
+                this.editTransaction = {
+                    id: transaction.id,
+                    wallet_id: String(transaction.wallet_id ?? ''),
+                    category_id: transaction.category_id ? String(transaction.category_id) : '',
+                    to_wallet_id: transaction.to_wallet_id ? String(transaction.to_wallet_id) : '',
+                    description: transaction.description ?? '',
+                    date: transaction.date,
+                    type: transaction.type,
+                };
+                this.editType = transaction.type;
+                this.editAmountRaw = String(transaction.amount ?? '');
+                this.editAmountDisplay = window.financeNumber.format(this.editAmountRaw);
+                this.showEditModal = true;
             }
         }">
         <div>
@@ -155,6 +179,139 @@
                 </div>
             </div>
         </template>
+
+        <!-- Edit Transaction Modal -->
+        <template x-teleport="body">
+            <div x-show="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0">
+                <div class="absolute inset-0 bg-surface/80 backdrop-blur-xl" @click="showEditModal = false"></div>
+
+                <div class="relative bg-surface-container-low border border-white/10 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden max-h-[calc(100vh-2rem)] flex flex-col"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    @click.stop>
+                    <form :action="'{{ url('transactions') }}/' + editTransaction.id" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="type" :value="editType">
+                        <input type="hidden" name="amount" :value="editAmountRaw">
+
+                        <div class="px-6 py-4 border-b border-white/5 flex justify-between items-center shrink-0">
+                            <h3 class="text-lg font-semibold">Edit Transaksi</h3>
+                            <button type="button" @click="showEditModal = false" class="text-on-surface-variant hover:text-on-surface transition-colors">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+
+                        <div class="p-6 space-y-5 overflow-y-auto">
+                            <div class="flex p-1 bg-surface-container-high rounded-xl border border-white/5">
+                                <button type="button" @click="editType = 'expense'"
+                                    :class="editType === 'expense' ? 'bg-tertiary-container text-on-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+                                    class="flex-1 py-2.5 rounded-lg text-[11px] uppercase tracking-widest transition-all">
+                                    Pengeluaran
+                                </button>
+                                <button type="button" @click="editType = 'income'"
+                                    :class="editType === 'income' ? 'bg-secondary text-on-secondary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+                                    class="flex-1 py-2.5 rounded-lg text-[11px] uppercase tracking-widest transition-all">
+                                    Pemasukan
+                                </button>
+                                <button type="button" @click="editType = 'transfer'"
+                                    :class="editType === 'transfer' ? 'bg-primary text-on-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+                                    class="flex-1 py-2.5 rounded-lg text-[11px] uppercase tracking-widest transition-all">
+                                    Transfer
+                                </button>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Jumlah</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-on-surface-variant">Rp</span>
+                                    <input x-model="editAmountDisplay" @input="setEditAmount($event.target.value)" type="text" inputmode="numeric" autocomplete="off"
+                                        class="w-full bg-surface-container-highest border-none rounded-xl pl-12 pr-5 py-4 text-2xl font-bold tracking-tight text-on-surface focus:ring-2 focus:ring-primary/30 outline-none placeholder:text-on-surface-variant/20"
+                                        placeholder="0" required>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Dompet</label>
+                                    <div class="relative">
+                                        <select name="wallet_id" x-model="editTransaction.wallet_id" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface appearance-none outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer" required>
+                                            <template x-for="wallet in wallets" :key="'edit-wallet-' + wallet.id">
+                                                <option :value="String(wallet.id)" x-text="wallet.name"></option>
+                                            </template>
+                                        </select>
+                                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm">expand_more</span>
+                                    </div>
+                                </div>
+
+                                <template x-if="editType === 'transfer'">
+                                    <div class="space-y-2">
+                                        <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Ke Dompet</label>
+                                        <div class="relative">
+                                            <select name="to_wallet_id" x-model="editTransaction.to_wallet_id" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface appearance-none outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer" :required="editType === 'transfer'">
+                                                <option value="">Pilih dompet tujuan</option>
+                                                <template x-for="wallet in wallets" :key="'edit-dest-wallet-' + wallet.id">
+                                                    <option :value="String(wallet.id)" x-text="wallet.name"></option>
+                                                </template>
+                                            </select>
+                                            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm">expand_more</span>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template x-if="editType !== 'transfer'">
+                                    <div class="space-y-2">
+                                        <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Kategori</label>
+                                        <div class="relative">
+                                            <select name="category_id" x-model="editTransaction.category_id" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface appearance-none outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer" :required="editType !== 'transfer'">
+                                                <option value="">Pilih kategori</option>
+                                                <template x-for="cat in categories" :key="'edit-cat-' + cat.id">
+                                                    <option :value="String(cat.id)" x-text="cat.name"></option>
+                                                </template>
+                                            </select>
+                                            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm">expand_more</span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Deskripsi</label>
+                                    <input name="description" type="text" x-model="editTransaction.description"
+                                        class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none placeholder:text-on-surface-variant/30"
+                                        placeholder="Untuk apa transaksi ini?">
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Tanggal</label>
+                                    <input name="date" type="date" x-model="editTransaction.date"
+                                        class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="px-6 py-4 bg-surface-container-high/50 border-t border-white/5 flex gap-3 shrink-0">
+                            <button type="submit"
+                                class="flex-1 py-3.5 bg-primary text-on-primary font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                                Update
+                            </button>
+                            <button type="button" @click="showEditModal = false"
+                                class="px-5 py-3.5 text-on-surface-variant font-medium hover:bg-white/5 rounded-xl transition-all">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </template>
     </div>
 
     <!-- Filter Section -->
@@ -225,56 +382,56 @@
     <section>
         <div class="bg-surface-container-low rounded-xl border border-white/5 shadow-2xl">
             <div class="overflow-x-auto rounded-b-xl">
-                <table class="w-full text-left border-collapse">
+                <table class="w-full min-w-[1180px] text-left border-collapse">
                     <thead>
                         <tr class="border-b border-white/5 bg-surface-container">
-                            <th class="px-6 py-5 w-16 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold text-center">No</th>
-                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">
-                                <div class="flex items-center gap-2">
+                            <th class="w-16 px-6 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold text-center">No</th>
+                            <th class="w-40 px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">
+                                <div class="inline-flex items-center gap-3 whitespace-nowrap">
                                     <span>Tanggal</span>
-                                    <div class="flex flex-col leading-none">
-                                        <a href="{{ $sortLink('date', 'asc') }}" class="{{ $sortIconClass('date', 'asc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_up</span></a>
-                                        <a href="{{ $sortLink('date', 'desc') }}" class="{{ $sortIconClass('date', 'desc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_down</span></a>
+                                    <div class="inline-flex items-center rounded-md border border-white/8 bg-surface-container-highest/70 px-1 py-0.5">
+                                        <a href="{{ $sortLink('date', 'asc') }}" class="{{ $sortIconClass('date', 'asc') }}"><span class="material-symbols-outlined text-[15px] leading-none">keyboard_arrow_up</span></a>
+                                        <a href="{{ $sortLink('date', 'desc') }}" class="{{ $sortIconClass('date', 'desc') }}"><span class="material-symbols-outlined text-[15px] leading-none">keyboard_arrow_down</span></a>
                                     </div>
                                 </div>
                             </th>
-                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">
-                                <div class="flex items-center gap-2">
+                            <th class="w-[360px] px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">
+                                <div class="inline-flex items-center gap-3 whitespace-nowrap">
                                     <span>Keterangan</span>
-                                    <div class="flex flex-col leading-none">
-                                        <a href="{{ $sortLink('description', 'asc') }}" class="{{ $sortIconClass('description', 'asc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_up</span></a>
-                                        <a href="{{ $sortLink('description', 'desc') }}" class="{{ $sortIconClass('description', 'desc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_down</span></a>
+                                    <div class="inline-flex items-center rounded-md border border-white/8 bg-surface-container-highest/70 px-1 py-0.5">
+                                        <a href="{{ $sortLink('description', 'asc') }}" class="{{ $sortIconClass('description', 'asc') }}"><span class="material-symbols-outlined text-[15px] leading-none">keyboard_arrow_up</span></a>
+                                        <a href="{{ $sortLink('description', 'desc') }}" class="{{ $sortIconClass('description', 'desc') }}"><span class="material-symbols-outlined text-[15px] leading-none">keyboard_arrow_down</span></a>
                                     </div>
                                 </div>
                             </th>
-                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">
-                                <div class="flex items-center gap-2">
+                            <th class="w-44 px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">
+                                <div class="inline-flex items-center gap-3 whitespace-nowrap">
                                     <span>Kategori</span>
-                                    <div class="flex flex-col leading-none">
-                                        <a href="{{ $sortLink('category', 'asc') }}" class="{{ $sortIconClass('category', 'asc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_up</span></a>
-                                        <a href="{{ $sortLink('category', 'desc') }}" class="{{ $sortIconClass('category', 'desc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_down</span></a>
+                                    <div class="inline-flex items-center rounded-md border border-white/8 bg-surface-container-highest/70 px-1 py-0.5">
+                                        <a href="{{ $sortLink('category', 'asc') }}" class="{{ $sortIconClass('category', 'asc') }}"><span class="material-symbols-outlined text-[15px] leading-none">keyboard_arrow_up</span></a>
+                                        <a href="{{ $sortLink('category', 'desc') }}" class="{{ $sortIconClass('category', 'desc') }}"><span class="material-symbols-outlined text-[15px] leading-none">keyboard_arrow_down</span></a>
                                     </div>
                                 </div>
                             </th>
-                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">
-                                <div class="flex items-center gap-2">
+                            <th class="w-40 px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">
+                                <div class="inline-flex items-center gap-3 whitespace-nowrap">
                                     <span>Dompet</span>
-                                    <div class="flex flex-col leading-none">
-                                        <a href="{{ $sortLink('wallet', 'asc') }}" class="{{ $sortIconClass('wallet', 'asc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_up</span></a>
-                                        <a href="{{ $sortLink('wallet', 'desc') }}" class="{{ $sortIconClass('wallet', 'desc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_down</span></a>
+                                    <div class="inline-flex items-center rounded-md border border-white/8 bg-surface-container-highest/70 px-1 py-0.5">
+                                        <a href="{{ $sortLink('wallet', 'asc') }}" class="{{ $sortIconClass('wallet', 'asc') }}"><span class="material-symbols-outlined text-[15px] leading-none">keyboard_arrow_up</span></a>
+                                        <a href="{{ $sortLink('wallet', 'desc') }}" class="{{ $sortIconClass('wallet', 'desc') }}"><span class="material-symbols-outlined text-[15px] leading-none">keyboard_arrow_down</span></a>
                                     </div>
                                 </div>
                             </th>
-                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold text-right">
-                                <div class="flex items-center justify-end gap-2">
+                            <th class="w-48 px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold text-right">
+                                <div class="inline-flex items-center justify-end gap-3 whitespace-nowrap">
                                     <span>Nominal</span>
-                                    <div class="flex flex-col leading-none">
-                                        <a href="{{ $sortLink('amount', 'asc') }}" class="{{ $sortIconClass('amount', 'asc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_up</span></a>
-                                        <a href="{{ $sortLink('amount', 'desc') }}" class="{{ $sortIconClass('amount', 'desc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_down</span></a>
+                                    <div class="inline-flex items-center rounded-md border border-white/8 bg-surface-container-highest/70 px-1 py-0.5">
+                                        <a href="{{ $sortLink('amount', 'asc') }}" class="{{ $sortIconClass('amount', 'asc') }}"><span class="material-symbols-outlined text-[15px] leading-none">keyboard_arrow_up</span></a>
+                                        <a href="{{ $sortLink('amount', 'desc') }}" class="{{ $sortIconClass('amount', 'desc') }}"><span class="material-symbols-outlined text-[15px] leading-none">keyboard_arrow_down</span></a>
                                     </div>
                                 </div>
                             </th>
-                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold text-right">
+                            <th class="w-28 px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     <span>Aksi</span>
                                 </div>
@@ -287,15 +444,15 @@
                             <td class="px-6 py-5 text-center text-sm text-on-surface-variant/70 whitespace-nowrap">
                                 {{ $transactions->firstItem() + $loop->index }}
                             </td>
-                            <td class="px-8 py-5 text-sm text-on-surface/80 whitespace-nowrap">
+                            <td class="w-40 px-8 py-5 text-sm text-on-surface/80 whitespace-nowrap">
                                 {{ $transaction->date->format('d M Y') }}
                             </td>
-                            <td class="px-8 py-5">
+                            <td class="w-[360px] px-8 py-5">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-xl bg-surface-container-highest flex items-center justify-center {{ $transaction->type === 'income' ? 'text-secondary group-hover:bg-secondary/20' : 'text-primary group-hover:bg-primary/20' }} transition-all group-hover:scale-110">
+                                    <div class="h-10 w-10 shrink-0 rounded-xl bg-surface-container-highest flex items-center justify-center {{ $transaction->type === 'income' ? 'text-secondary group-hover:bg-secondary/20' : 'text-primary group-hover:bg-primary/20' }} transition-all group-hover:scale-110">
                                         <span class="material-symbols-outlined">{{ $transaction->category->icon ?? 'payments' }}</span>
                                     </div>
-                                    <div>
+                                    <div class="min-w-0">
                                         <p class="text-sm font-semibold text-on-surface group-hover:text-primary transition-colors">
                                             {{ $transaction->description ?? '—' }}
                                         </p>
@@ -303,33 +460,49 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-8 py-5">
-                                <span class="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold
+                            <td class="w-44 px-8 py-5">
+                                <span class="inline-flex whitespace-nowrap px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold
                                     {{ $transaction->type === 'income' ? 'bg-secondary/10 text-secondary' : 'bg-surface-container-highest text-on-surface-variant' }}">
                                     {{ $transaction->category->name ?? 'Tidak Ada' }}
                                 </span>
                             </td>
-                            <td class="px-8 py-5">
-                                <div class="flex items-center gap-2">
+                            <td class="w-40 px-8 py-5">
+                                <div class="flex items-center gap-2 whitespace-nowrap">
                                     <span class="w-2 h-2 rounded-full {{ $transaction->wallet->color ?? 'bg-primary' }} shadow-sm"></span>
                                     <span class="text-sm text-on-surface/80">{{ $transaction->wallet->name }}</span>
                                 </div>
                             </td>
-                            <td class="px-8 py-5 text-right">
+                            <td class="w-48 px-8 py-5 text-right whitespace-nowrap">
                                 <span class="text-sm font-bold {{ $transaction->type === 'income' ? 'text-secondary' : 'text-tertiary-container' }}">
                                     {{ $transaction->type === 'income' ? '+' : '-' }} Rp {{ number_format($transaction->amount, 0, ',', '.') }}
                                 </span>
                             </td>
-                            <td class="px-8 py-5 text-right">
-                                <form action="{{ route('transactions.destroy', $transaction) }}" method="POST"
-                                    data-confirm="Transaksi ini akan dihapus dan saldo dompet akan dikembalikan. Lanjutkan?">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                        class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-tertiary-container/10 rounded-lg text-on-surface-variant/40 hover:text-tertiary-container">
-                                        <span class="material-symbols-outlined text-sm">delete</span>
+                            <td class="w-28 px-8 py-5 text-right">
+                                <div class="flex items-center justify-end gap-1">
+                                    <button type="button"
+                                        x-on:click="openEditModal(@js([
+                                            'id' => $transaction->id,
+                                            'wallet_id' => $transaction->wallet_id,
+                                            'category_id' => $transaction->category_id,
+                                            'to_wallet_id' => $transaction->to_wallet_id,
+                                            'type' => $transaction->type,
+                                            'amount' => (float) $transaction->amount,
+                                            'description' => $transaction->description,
+                                            'date' => $transaction->date->format('Y-m-d'),
+                                        ]))"
+                                        class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-primary/10 rounded-lg text-on-surface-variant/40 hover:text-primary">
+                                        <span class="material-symbols-outlined text-sm">edit</span>
                                     </button>
-                                </form>
+                                    <form action="{{ route('transactions.destroy', $transaction) }}" method="POST"
+                                        data-confirm="Transaksi ini akan dihapus dan saldo dompet akan dikembalikan. Lanjutkan?">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                            class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-tertiary-container/10 rounded-lg text-on-surface-variant/40 hover:text-tertiary-container">
+                                            <span class="material-symbols-outlined text-sm">delete</span>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         @empty
