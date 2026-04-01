@@ -23,7 +23,11 @@ class TransactionController extends Controller
             $query->where('wallet_id', $request->wallet_id);
         }
 
-        $transactions = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->paginate(15);
+        if ($request->filled('date')) {
+            $query->whereDate('date', $request->date);
+        }
+
+        $transactions = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->get();
         $wallets = Auth::user()->wallets()->get();
         $categories = Auth::user()->categories()->get();
 

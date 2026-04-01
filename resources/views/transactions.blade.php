@@ -188,6 +188,21 @@
                         @endforeach
                     </select>
                 </div>
+                <div class="flex-1 min-w-[180px]">
+                    <label class="block font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant mb-2">Tanggal</label>
+                    <input type="date" name="date" value="{{ request('date') }}"
+                        class="w-full bg-surface-container-lowest border border-white/10 rounded-lg py-2.5 px-4 text-on-surface text-sm focus:border-primary/50 transition-colors outline-none">
+                </div>
+                <div class="flex items-center gap-3">
+                    <button type="submit"
+                        class="px-4 py-2.5 bg-primary text-on-primary text-sm font-semibold rounded-lg shadow-lg shadow-primary/15 hover:scale-[1.02] transition-all">
+                        Terapkan
+                    </button>
+                    <a href="{{ route('transactions') }}"
+                        class="px-4 py-2.5 bg-surface-container-lowest border border-white/10 text-on-surface-variant text-sm font-semibold rounded-lg hover:text-on-surface transition-colors">
+                        Reset
+                    </a>
+                </div>
             </form>
         </div>
     </section>
@@ -195,10 +210,10 @@
     <!-- Transaction Table Section -->
     <section>
         <div class="bg-surface-container-low rounded-xl border border-white/5 shadow-2xl">
-            <div class="overflow-x-auto rounded-b-xl">
+            <div class="overflow-x-auto rounded-t-xl">
                 <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-white/5 bg-white/5">
+                    <thead class="sticky top-0 z-10">
+                        <tr class="border-b border-white/5 bg-surface-container">
                             <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">Tanggal</th>
                             <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">Keterangan</th>
                             <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">Kategori</th>
@@ -207,6 +222,10 @@
                             <th class="px-8 py-5"></th>
                         </tr>
                     </thead>
+                </table>
+            </div>
+            <div class="max-h-[760px] overflow-y-auto rounded-b-xl">
+                <table class="w-full text-left border-collapse">
                     <tbody class="divide-y divide-white/5">
                         @forelse($transactions as $transaction)
                         <tr class="hover:bg-white/5 transition-colors group cursor-pointer">
@@ -270,7 +289,7 @@
             </div>
 
             <!-- Pagination -->
-            @if($transactions->hasPages())
+            @if(false)
             <div class="px-8 py-6 border-t border-white/5 flex items-center justify-between">
                 <span class="text-xs text-on-surface-variant">
                     Menampilkan {{ $transactions->firstItem() }}–{{ $transactions->lastItem() }} dari {{ $transactions->total() }} transaksi
