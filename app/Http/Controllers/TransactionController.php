@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
-use App\Models\Wallet;
-use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +12,8 @@ class TransactionController extends Controller
     public function index(Request $request)
     {
         $query = Auth::user()->transactions()->with(['wallet', 'category', 'toWallet']);
+        $sortBy = $request->input('sort_by', 'date');
+        $sortDir = $request->input('sort_dir', 'desc');
 
         if ($request->has('type') && $request->type != 'all') {
             $query->where('type', $request->type);
@@ -27,11 +27,34 @@ class TransactionController extends Controller
             $query->whereDate('date', $request->date);
         }
 
-        $transactions = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->get();
+        $allowedSorts = ['date', 'description', 'category', 'wallet', 'amount', 'type'];
+
+        if (! in_array($sortBy, $allowedSorts, true)) {
+            $sortBy = 'date';
+        }
+
+        if (! in_array($sortDir, ['asc', 'desc'], true)) {
+            $sortDir = 'desc';
+        }
+
+        $transactions = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->get()
+            ->sortBy(
+                fn (Transaction $transaction) => match ($sortBy) {
+                    'description' => strtolower((string) ($transaction->description ?? '')),
+                    'category' => strtolower((string) ($transaction->category->name ?? '')),
+                    'wallet' => strtolower((string) ($transaction->wallet->name ?? '')),
+                    'amount' => (float) $transaction->amount,
+                    'type' => strtolower((string) $transaction->type),
+                    default => $transaction->date?->timestamp ?? 0,
+                },
+                options: SORT_NATURAL,
+                descending: $sortDir === 'desc'
+            )
+            ->values();
         $wallets = Auth::user()->wallets()->get();
         $categories = Auth::user()->categories()->get();
 
-        return view('transactions', compact('transactions', 'wallets', 'categories'));
+        return view('transactions', compact('transactions', 'wallets', 'categories', 'sortBy', 'sortDir'));
     }
 
     public function store(Request $request)

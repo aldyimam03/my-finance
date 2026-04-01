@@ -208,17 +208,72 @@
     </section>
 
     <!-- Transaction Table Section -->
+    @php
+        $sortLink = function (string $column, string $direction) {
+            return route('transactions', array_merge(request()->query(), [
+                'sort_by' => $column,
+                'sort_dir' => $direction,
+            ]));
+        };
+
+        $sortIconClass = function (string $column, string $direction) use ($sortBy, $sortDir) {
+            return $sortBy === $column && $sortDir === $direction
+                ? 'text-primary'
+                : 'text-on-surface-variant/35 hover:text-on-surface-variant';
+        };
+    @endphp
     <section>
         <div class="bg-surface-container-low rounded-xl border border-white/5 shadow-2xl">
             <div class="overflow-x-auto rounded-t-xl">
                 <table class="w-full text-left border-collapse">
                     <thead class="sticky top-0 z-10">
                         <tr class="border-b border-white/5 bg-surface-container">
-                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">Tanggal</th>
-                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">Keterangan</th>
-                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">Kategori</th>
-                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">Dompet</th>
-                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold text-right">Nominal</th>
+                            <th class="px-6 py-5 w-16 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold text-center">No</th>
+                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">
+                                <div class="flex items-center gap-2">
+                                    <span>Tanggal</span>
+                                    <div class="flex flex-col leading-none">
+                                        <a href="{{ $sortLink('date', 'asc') }}" class="{{ $sortIconClass('date', 'asc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_up</span></a>
+                                        <a href="{{ $sortLink('date', 'desc') }}" class="{{ $sortIconClass('date', 'desc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_down</span></a>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">
+                                <div class="flex items-center gap-2">
+                                    <span>Keterangan</span>
+                                    <div class="flex flex-col leading-none">
+                                        <a href="{{ $sortLink('description', 'asc') }}" class="{{ $sortIconClass('description', 'asc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_up</span></a>
+                                        <a href="{{ $sortLink('description', 'desc') }}" class="{{ $sortIconClass('description', 'desc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_down</span></a>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">
+                                <div class="flex items-center gap-2">
+                                    <span>Kategori</span>
+                                    <div class="flex flex-col leading-none">
+                                        <a href="{{ $sortLink('category', 'asc') }}" class="{{ $sortIconClass('category', 'asc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_up</span></a>
+                                        <a href="{{ $sortLink('category', 'desc') }}" class="{{ $sortIconClass('category', 'desc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_down</span></a>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">
+                                <div class="flex items-center gap-2">
+                                    <span>Dompet</span>
+                                    <div class="flex flex-col leading-none">
+                                        <a href="{{ $sortLink('wallet', 'asc') }}" class="{{ $sortIconClass('wallet', 'asc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_up</span></a>
+                                        <a href="{{ $sortLink('wallet', 'desc') }}" class="{{ $sortIconClass('wallet', 'desc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_down</span></a>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="px-8 py-5 font-['Inter'] text-[11px] uppercase tracking-widest text-on-surface-variant font-bold text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <span>Nominal</span>
+                                    <div class="flex flex-col leading-none">
+                                        <a href="{{ $sortLink('amount', 'asc') }}" class="{{ $sortIconClass('amount', 'asc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_up</span></a>
+                                        <a href="{{ $sortLink('amount', 'desc') }}" class="{{ $sortIconClass('amount', 'desc') }}"><span class="material-symbols-outlined text-sm">keyboard_arrow_down</span></a>
+                                    </div>
+                                </div>
+                            </th>
                             <th class="px-8 py-5"></th>
                         </tr>
                     </thead>
@@ -229,6 +284,9 @@
                     <tbody class="divide-y divide-white/5">
                         @forelse($transactions as $transaction)
                         <tr class="hover:bg-white/5 transition-colors group cursor-pointer">
+                            <td class="px-6 py-5 text-center text-sm text-on-surface-variant/70 whitespace-nowrap">
+                                {{ $loop->iteration }}
+                            </td>
                             <td class="px-8 py-5 text-sm text-on-surface/80 whitespace-nowrap">
                                 {{ $transaction->date->format('d M Y') }}
                             </td>
@@ -276,7 +334,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="px-8 py-16 text-center">
+                            <td colspan="7" class="px-8 py-16 text-center">
                                 <div class="flex flex-col items-center gap-3">
                                     <span class="material-symbols-outlined text-5xl text-on-surface-variant/20">receipt_long</span>
                                     <p class="text-on-surface-variant/60 italic">Belum ada transaksi tercatat.</p>
