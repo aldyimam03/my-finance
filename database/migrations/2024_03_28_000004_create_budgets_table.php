@@ -15,6 +15,8 @@ return new class extends Migration
             $table->decimal('amount', 15, 2);
             $table->string('period')->default('monthly');
             $table->timestamps();
+
+            $table->unique(['user_id', 'category_id', 'period'], 'budgets_user_category_period_unique');
         });
     }
 
