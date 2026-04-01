@@ -16,6 +16,7 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $now = Carbon::now();
+        $currentPeriod = $now->format('Y-m');
         $startOfMonth = $now->copy()->startOfMonth();
         $endOfMonth = $now->copy()->endOfMonth();
 
@@ -58,7 +59,11 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        $budgets = $user->budgets()->with('category')->get()->map(function ($budget) use ($user, $startOfMonth, $endOfMonth) {
+        $budgets = $user->budgets()
+            ->with('category')
+            ->where('period', $currentPeriod)
+            ->get()
+            ->map(function ($budget) use ($user, $startOfMonth, $endOfMonth) {
             $spent = $user->transactions()
                 ->where('category_id', $budget->category_id)
                 ->where('type', 'expense')

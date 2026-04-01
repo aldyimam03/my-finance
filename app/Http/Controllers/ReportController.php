@@ -86,6 +86,7 @@ class ReportController extends Controller
 
         $budgetPerformance = $user->budgets()
             ->with('category')
+            ->where('period', $month)
             ->get()
             ->map(function ($budget) use ($user, $startDate, $endDate) {
                 $spent = $user->transactions()

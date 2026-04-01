@@ -20,6 +20,7 @@ class NotificationComposer
 
         $notifications = collect();
         $now           = Carbon::now();
+        $currentPeriod = $now->format('Y-m');
         $startOfMonth  = $now->copy()->startOfMonth();
         $endOfMonth    = $now->copy()->endOfMonth();
 
@@ -30,7 +31,10 @@ class NotificationComposer
 
         // 1. Peringatan Anggaran — hanya jika diaktifkan di pengaturan
         if ($wantBudgetAlert) {
-            $budgets = $user->budgets()->with('category')->get();
+            $budgets = $user->budgets()
+                ->with('category')
+                ->where('period', $currentPeriod)
+                ->get();
             foreach ($budgets as $budget) {
                 $spent = $user->transactions()
                     ->where('category_id', $budget->category_id)
