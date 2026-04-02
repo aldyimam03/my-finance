@@ -128,7 +128,7 @@
 
         <!-- Bottom Actions -->
         <div class="px-2 pt-4 pb-6 space-y-0.5 border-t border-white/5 mt-2 shrink-0">
-            <!-- Tambah Transaksi -->
+            {{-- <!-- Tambah Transaksi -->
             <button
                 @click="isTransactionModalOpen = true; if(isMobile()) closeMobileMenu()"
                 class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary transition-all font-semibold group"
@@ -136,7 +136,7 @@
             >
                 <span class="material-symbols-outlined text-[22px] shrink-0">add_circle</span>
                 <span x-show="sidebarOpen || mobileMenuOpen" class="text-[14px] whitespace-nowrap overflow-hidden">Tambah Transaksi</span>
-            </button>
+            </button> --}}
 
             <!-- Pengaturan -->
             <a

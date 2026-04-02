@@ -20,6 +20,7 @@
                 this.editAmountDisplay = window.financeNumber.format(this.editAmountRaw);
             },
             openEditModal(transaction) {
+                const normalizedType = transaction.type === 'income' ? 'income' : 'expense';
                 this.editTransaction = {
                     id: transaction.id,
                     wallet_id: String(transaction.wallet_id ?? ''),
@@ -27,9 +28,9 @@
                     to_wallet_id: transaction.to_wallet_id ? String(transaction.to_wallet_id) : '',
                     description: transaction.description ?? '',
                     date: transaction.date,
-                    type: transaction.type,
+                    type: normalizedType,
                 };
-                this.editType = transaction.type;
+                this.editType = normalizedType;
                 this.editAmountRaw = String(transaction.amount ?? '');
                 this.editAmountDisplay = window.financeNumber.format(this.editAmountRaw);
                 this.showEditModal = true;
@@ -41,16 +42,16 @@
             <span class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant block mb-2">Manajemen Keuangan</span>
             <h2 class="font-['Inter'] text-3xl font-bold tracking-tight text-on-surface">Daftar Transaksi</h2>
         </div>
-        <div class="w-full md:w-auto flex flex-col gap-3 md:gap-4">
+        <div class="w-full md:w-auto flex flex-col gap-3 md:flex-row md:items-center md:justify-end md:gap-4">
             <div class="grid grid-cols-2 gap-3 md:flex md:gap-4 md:items-center">
-            <div class="bg-surface-container-low px-4 py-4 sm:px-6 rounded-xl shadow-lg border border-white/5 min-w-0">
+            <div class="bg-surface-container-low px-4 py-4 sm:px-6 rounded-xl shadow-lg border border-white/5 min-w-0 md:min-w-[200px]">
                 <span class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-secondary/70 block mb-1">Total Pemasukan</span>
                 <div class="flex items-baseline gap-1">
                     <span class="text-xs text-secondary/60">Rp</span>
                     <span class="text-lg sm:text-2xl font-bold text-secondary break-all">{{ number_format(auth()->user()->transactions()->where('type','income')->whereMonth('date', now()->month)->sum('amount'), 0, ',', '.') }}</span>
                 </div>
             </div>
-            <div class="bg-surface-container-low px-4 py-4 sm:px-6 rounded-xl shadow-lg border border-white/5 min-w-0">
+            <div class="bg-surface-container-low px-4 py-4 sm:px-6 rounded-xl shadow-lg border border-white/5 min-w-0 md:min-w-[200px]">
                 <span class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-tertiary-container/70 block mb-1">Total Pengeluaran</span>
                 <div class="flex items-baseline gap-1">
                     <span class="text-xs text-tertiary-container/60">Rp</span>
@@ -222,11 +223,6 @@
                                     class="flex-1 py-2.5 rounded-lg text-[11px] uppercase tracking-widest transition-all">
                                     Pemasukan
                                 </button>
-                                <button type="button" @click="editType = 'transfer'"
-                                    :class="editType === 'transfer' ? 'bg-primary text-on-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
-                                    class="flex-1 py-2.5 rounded-lg text-[11px] uppercase tracking-widest transition-all">
-                                    Transfer
-                                </button>
                             </div>
 
                             <div class="space-y-2">
@@ -252,35 +248,18 @@
                                     </div>
                                 </div>
 
-                                <template x-if="editType === 'transfer'">
-                                    <div class="space-y-2">
-                                        <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Ke Dompet</label>
-                                        <div class="relative">
-                                            <select name="to_wallet_id" x-model="editTransaction.to_wallet_id" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface appearance-none outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer" :required="editType === 'transfer'">
-                                                <option value="">Pilih dompet tujuan</option>
-                                                <template x-for="wallet in wallets" :key="'edit-dest-wallet-' + wallet.id">
-                                                    <option :value="String(wallet.id)" x-text="wallet.name"></option>
-                                                </template>
-                                            </select>
-                                            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm">expand_more</span>
-                                        </div>
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Kategori</label>
+                                    <div class="relative">
+                                        <select name="category_id" x-model="editTransaction.category_id" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface appearance-none outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer" required>
+                                            <option value="">Pilih kategori</option>
+                                            <template x-for="cat in categories" :key="'edit-cat-' + cat.id">
+                                                <option :value="String(cat.id)" x-text="cat.name"></option>
+                                            </template>
+                                        </select>
+                                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm">expand_more</span>
                                     </div>
-                                </template>
-
-                                <template x-if="editType !== 'transfer'">
-                                    <div class="space-y-2">
-                                        <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Kategori</label>
-                                        <div class="relative">
-                                            <select name="category_id" x-model="editTransaction.category_id" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface appearance-none outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer" :required="editType !== 'transfer'">
-                                                <option value="">Pilih kategori</option>
-                                                <template x-for="cat in categories" :key="'edit-cat-' + cat.id">
-                                                    <option :value="String(cat.id)" x-text="cat.name"></option>
-                                                </template>
-                                            </select>
-                                            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm">expand_more</span>
-                                        </div>
-                                    </div>
-                                </template>
+                                </div>
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
