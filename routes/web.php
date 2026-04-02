@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransactionController;
@@ -51,6 +52,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/search', [SearchController::class, 'index'])->name('search');
+    Route::get('/search/suggest', [SearchController::class, 'suggest'])->name('search.suggest');
 
     Route::get('/wallets', [WalletController::class, 'index'])->name('wallets');
     Route::get('/wallets/create', [WalletController::class, 'create'])->name('wallets.create');

@@ -84,7 +84,7 @@
                 x-transition:leave-end="opacity-0"
                 class="overflow-hidden">
                 <h1 class="text-[15px] font-semibold tracking-tight text-[#e5e2e1] whitespace-nowrap">My Finance</h1>
-                <p class="text-[10px] uppercase tracking-[0.05em] text-on-surface-variant opacity-60 whitespace-nowrap">Obsidian Ledger</p>
+                <p class="text-[10px] uppercase tracking-[0.05em] text-on-surface-variant opacity-60 whitespace-nowrap">Pengelolaan Keuangan</p>
             </div>
         </div>
 
@@ -185,9 +185,157 @@
             </button>
 
             <!-- Search bar — hidden on small phones, visible tablet+ -->
-            <div class="hidden sm:flex items-center gap-4 bg-surface-container-lowest/50 px-4 py-2 rounded-full border border-white/5 focus-within:ring-1 focus-within:ring-[#adc6ff]/50 transition-all w-full max-w-xs lg:max-w-md">
-                <span class="material-symbols-outlined text-on-surface-variant text-xl shrink-0">search</span>
-                <input class="bg-transparent border-none focus:ring-0 text-sm w-full text-on-surface placeholder:text-on-surface-variant/50 outline-none" placeholder="Cari transaksi atau laporan..." type="text" />
+            <div
+                x-data="{
+                    query: @js((string) request('q', '')),
+                    open: false,
+                    loading: false,
+                    results: { transactions: [], reports: [] },
+                    activeIndex: -1,
+                    debounceId: null,
+                    get flattenedResults() {
+                        return [
+                            ...(this.results.transactions ?? []).map(item => ({ ...item, kind: 'transaction' })),
+                            ...(this.results.reports ?? []).map(item => ({ ...item, kind: 'report' })),
+                        ];
+                    },
+                    resetActive() {
+                        this.activeIndex = this.flattenedResults.length ? 0 : -1;
+                    },
+                    moveSelection(step) {
+                        if (!this.flattenedResults.length) return;
+                        if (this.activeIndex === -1) {
+                            this.activeIndex = 0;
+                            return;
+                        }
+                        const total = this.flattenedResults.length;
+                        this.activeIndex = (this.activeIndex + step + total) % total;
+                    },
+                    goToActive() {
+                        const item = this.flattenedResults[this.activeIndex];
+                        if (item?.url) {
+                            window.location.href = item.url;
+                            return;
+                        }
+                        this.$refs.searchForm?.requestSubmit();
+                    },
+                    async fetchResults() {
+                        const q = this.query.trim();
+                        if (this.debounceId) clearTimeout(this.debounceId);
+                        if (q.length < 2) {
+                            this.results = { transactions: [], reports: [] };
+                            this.open = false;
+                            this.loading = false;
+                            this.activeIndex = -1;
+                            return;
+                        }
+                        this.loading = true;
+                        this.debounceId = setTimeout(async () => {
+                            try {
+                                const response = await fetch(`{{ route('search.suggest') }}?q=${encodeURIComponent(q)}`, {
+                                    headers: { Accept: 'application/json' }
+                                });
+                                const data = await response.json();
+                                this.results = data;
+                                this.open = (data.transactions?.length ?? 0) > 0 || (data.reports?.length ?? 0) > 0;
+                                this.resetActive();
+                            } catch (error) {
+                                this.results = { transactions: [], reports: [] };
+                                this.open = false;
+                                this.activeIndex = -1;
+                            } finally {
+                                this.loading = false;
+                            }
+                        }, 220);
+                    }
+                }"
+                @click.outside="open = false"
+                @keydown.escape.window="open = false"
+                class="hidden sm:block relative w-full max-w-xs lg:max-w-md"
+            >
+                <form
+                    x-ref="searchForm"
+                    action="{{ route('search') }}"
+                    method="GET"
+                    @keydown.arrow-down.prevent="moveSelection(1); open = true"
+                    @keydown.arrow-up.prevent="moveSelection(-1); open = true"
+                    @keydown.enter.prevent="if (open && flattenedResults.length) { goToActive() } else { $refs.searchForm.requestSubmit() }"
+                    class="flex items-center gap-4 bg-surface-container-lowest/50 px-4 py-2 rounded-full border border-white/5 focus-within:ring-1 focus-within:ring-[#adc6ff]/50 transition-all w-full"
+                >
+                    <span class="material-symbols-outlined text-on-surface-variant text-xl shrink-0">search</span>
+                    <input
+                        class="bg-transparent border-none focus:ring-0 text-sm w-full text-on-surface placeholder:text-on-surface-variant/50 outline-none"
+                        name="q"
+                        x-model="query"
+                        @focus="if ((results.transactions?.length ?? 0) || (results.reports?.length ?? 0)) open = true"
+                        @input="fetchResults()"
+                        placeholder="Cari transaksi atau laporan..."
+                        type="text"
+                    />
+                </form>
+
+                <div
+                    x-show="open || loading"
+                    x-transition:enter="transition ease-out duration-150"
+                    x-transition:enter-start="opacity-0 -translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-100"
+                    x-transition:leave-start="opacity-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 -translate-y-1"
+                    class="absolute top-full left-0 right-0 mt-3 rounded-3xl border border-white/10 bg-surface-container-low shadow-2xl shadow-black/40 overflow-hidden z-50"
+                    style="display: none;"
+                >
+                    <div x-show="loading" class="px-5 py-4 text-sm text-on-surface-variant/70">
+                        Mencari...
+                    </div>
+
+                    <template x-if="!loading">
+                        <div>
+                            <template x-if="results.transactions.length">
+                                <div class="border-b border-white/5">
+                                    <div class="px-5 pt-4 pb-2 text-[10px] uppercase tracking-[0.12em] text-on-surface-variant/55">Transaksi</div>
+                                    <template x-for="(item, index) in results.transactions" :key="`${item.url}-${item.description}-${item.date}`">
+                                        <a
+                                            :href="item.url"
+                                            class="block px-5 py-3 hover:bg-white/5 transition-colors"
+                                            :class="activeIndex === index ? 'bg-white/5' : ''"
+                                            @mouseenter="activeIndex = index"
+                                        >
+                                            <div class="flex items-center justify-between gap-3">
+                                                <div class="min-w-0">
+                                                    <p class="text-sm font-medium text-on-surface truncate" x-text="item.description"></p>
+                                                    <p class="text-[11px] text-on-surface-variant/60 mt-1 truncate">
+                                                        <span x-text="`${item.category} • ${item.wallet} • ${item.date}`"></span>
+                                                    </p>
+                                                </div>
+                                                <p class="text-xs font-semibold shrink-0" :class="item.type === 'income' ? 'text-secondary' : 'text-tertiary-container'" x-text="`${item.type === 'income' ? '+' : '-'} Rp ${item.amount}`"></p>
+                                            </div>
+                                        </a>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template x-if="results.reports.length">
+                                <div class="px-5 py-3">
+                                    <div class="pb-2 text-[10px] uppercase tracking-[0.12em] text-on-surface-variant/55">Laporan</div>
+                                    <div class="space-y-2">
+                                        <template x-for="(item, index) in results.reports" :key="item.url">
+                                            <a
+                                                :href="item.url"
+                                                class="block rounded-2xl bg-white/[0.03] px-4 py-3 hover:bg-white/[0.05] transition-colors"
+                                                :class="activeIndex === (results.transactions.length + index) ? 'bg-white/[0.07] ring-1 ring-white/10' : ''"
+                                                @mouseenter="activeIndex = results.transactions.length + index"
+                                            >
+                                                <p class="text-sm font-medium text-on-surface" x-text="item.label"></p>
+                                                <p class="text-[11px] text-on-surface-variant/60 mt-1">Buka laporan bulanan</p>
+                                            </a>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
             </div>
         </div>
 
