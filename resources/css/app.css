@@ -5,7 +5,114 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/container-queries";
+
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-on-surface: #e5e2e1;
+    --color-inverse-on-surface: #313030;
+    --color-primary: #adc6ff;
+    --color-surface-tint: #adc6ff;
+    --color-on-tertiary-container: #5b0017;
+    --color-on-primary-fixed: #001a41;
+    --color-surface-container-lowest: #0e0e0e;
+    --color-surface-bright: #393939;
+    --color-secondary: #4edea3;
+    --color-primary-fixed: #d8e2ff;
+    --color-on-primary: #002e69;
+    --color-on-primary-fixed-variant: #004493;
+    --color-on-tertiary-fixed: #40000d;
+    --color-on-secondary-container: #00311f;
+    --color-tertiary: #ffb2b7;
+    --color-surface-dim: #131313;
+    --color-error: #ffb4ab;
+    --color-on-tertiary-fixed-variant: #92002a;
+    --color-on-secondary-fixed: #002113;
+    --color-background: #131313;
+    --color-tertiary-fixed-dim: #ffb2b7;
+    --color-surface-container-high: #2a2a2a;
+    --color-on-background: #e5e2e1;
+    --color-surface-container: #201f1f;
+    --color-primary-container: #4b8eff;
+    --color-on-error-container: #ffdad6;
+    --color-on-tertiary: #67001b;
+    --color-secondary-container: #00a572;
+    --color-on-secondary-fixed-variant: #005236;
+    --color-surface-container-highest: #353534;
+    --color-surface: #131313;
+    --color-on-secondary: #003824;
+    --color-tertiary-container: #ff516a;
+    --color-primary-fixed-dim: #adc6ff;
+    --color-on-error: #690005;
+    --color-tertiary-fixed: #ffdadb;
+    --color-outline: #8b90a0;
+    --color-error-container: #93000a;
+    --color-inverse-surface: #e5e2e1;
+    --color-inverse-primary: #005bc1;
+    --color-secondary-fixed-dim: #4edea3;
+    --color-surface-container-low: #1c1b1b;
+    --color-on-surface-variant: #c1c6d7;
+    --color-secondary-fixed: #6ffbbe;
+    --color-on-primary-container: #00285c;
+    --color-surface-variant: #353534;
+    --color-outline-variant: #414755;
+
+    --font-headline: "Inter", sans-serif;
+    --font-body: "Inter", sans-serif;
+    --font-label: "Inter", sans-serif;
+
+    --radius-DEFAULT: 0.125rem;
+    --radius-lg: 0.25rem;
+    --radius-xl: 0.5rem;
+    --radius-full: 0.75rem;
+}
+
+@utility obsidian-glass {
+    background: rgba(53, 53, 52, 0.4);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@utility glass-panel {
+    background: rgba(53, 53, 52, 0.4);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@utility glass-card {
+    background: rgba(53, 53, 52, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@utility obsidian-gradient {
+    background: linear-gradient(135deg, #131313 0%, #0e0e0e 100%);
+}
+
+@utility accent-gradient {
+    background: linear-gradient(135deg, #adc6ff 0%, #4b8eff 100%);
+}
+
+@utility text-gradient-primary {
+    background: linear-gradient(135deg, #adc6ff 0%, #4b8eff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+@utility material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: none !important;
+}
+
+select::-ms-expand {
+    display: none;
 }
