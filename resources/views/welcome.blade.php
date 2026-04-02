@@ -3,6 +3,12 @@
         <h2 class="text-3xl font-semibold text-on-surface mb-2 tracking-tight">Selamat Datang</h2>
         <p class="text-on-surface-variant body-md">Silakan masuk ke akun Obsidian Ledger Anda.</p>
     </div>
+
+    @if (session('status'))
+        <div class="mb-6 rounded-2xl border border-secondary/20 bg-secondary/10 px-4 py-3 text-sm text-secondary">
+            {{ session('status') }}
+        </div>
+    @endif
     
     <form action="/login" method="POST" class="space-y-6">
         @csrf
@@ -57,7 +63,7 @@
                 <span class="text-sm text-on-surface-variant group-hover:text-on-surface transition-colors">Ingat Saya</span>
             </label>
             <a class="text-sm text-primary hover:text-primary-container transition-colors font-medium"
-                href="#">Lupa Kata Sandi?</a>
+                href="{{ route('password.request') }}">Lupa Kata Sandi?</a>
         </div>
         
         <!-- Submit Button -->

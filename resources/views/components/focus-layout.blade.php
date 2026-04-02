@@ -22,13 +22,15 @@
             <span class="text-xl font-bold tracking-tighter text-[#e5e2e1] hidden sm:block">My Finance</span>
         </div>
         <div class="flex items-center gap-4">
-            <div class="text-right hidden sm:block">
-                <p class="text-xs font-semibold text-[#e5e2e1]">{{ Auth::user()->name ?? 'Guest' }}</p>
-                <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">{{ Auth::user()->email ?? '' }}</p>
-            </div>
-            <img alt="User profile avatar"
-                class="w-8 h-8 rounded-full object-cover ring-1 ring-primary/20"
-                src="{{ Auth::user()?->avatarUrl() }}" />
+            @auth
+                <div class="text-right hidden sm:block">
+                    <p class="text-xs font-semibold text-[#e5e2e1]">{{ Auth::user()->name }}</p>
+                    <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">{{ Auth::user()->email }}</p>
+                </div>
+                <img alt="User profile avatar"
+                    class="w-8 h-8 rounded-full object-cover ring-1 ring-primary/20"
+                    src="{{ Auth::user()->avatarUrl() }}" />
+            @endauth
         </div>
     </nav>
 

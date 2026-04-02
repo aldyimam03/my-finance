@@ -51,7 +51,11 @@
                 </div>
                 <!-- Subtle Data Point Visualization (Signature Component) -->
                 @php
-                    $s = $stats ?? ['users' => 0, 'transactions' => 0, 'totalAssets' => 0];
+                    $s = array_merge([
+                        'users' => 0,
+                        'transactions' => 0,
+                        'totalAssets' => 0,
+                    ], $stats ?? []);
 
                     // Format angka ringkas
                     $fmtNum = fn($n) => $n >= 1_000_000 ? number_format($n/1_000_000, 1, ',', '.').'M'
@@ -105,13 +109,13 @@
                 <div
                     class="mt-24 md:absolute md:bottom-12 md:left-1/2 md:-translate-x-1/2 flex items-center gap-6 justify-center w-full">
                     <a class="text-[10px] uppercase tracking-[0.1em] text-on-surface-variant/50 hover:text-on-surface transition-colors"
-                        href="#">Bantuan</a>
+                        href="{{ route('help') }}">Bantuan</a>
                     <div class="w-1 h-1 rounded-full bg-outline-variant/30"></div>
                     <a class="text-[10px] uppercase tracking-[0.1em] text-on-surface-variant/50 hover:text-on-surface transition-colors"
-                        href="#">Privasi</a>
+                        href="{{ route('privacy') }}">Privasi</a>
                     <div class="w-1 h-1 rounded-full bg-outline-variant/30"></div>
                     <a class="text-[10px] uppercase tracking-[0.1em] text-on-surface-variant/50 hover:text-on-surface transition-colors"
-                        href="#">Keamanan</a>
+                        href="{{ route('security') }}">Keamanan</a>
                 </div>
             </div>
         </section>
