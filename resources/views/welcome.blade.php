@@ -1,7 +1,7 @@
 <x-guest-layout title="Login - My Finance" :stats="$stats ?? []">
     <div class="mb-10">
         <h2 class="text-3xl font-semibold text-on-surface mb-2 tracking-tight">Selamat Datang</h2>
-        <p class="text-on-surface-variant body-md">Silakan masuk ke akun Obsidian Ledger Anda.</p>
+        <p class="text-on-surface-variant body-md">Silakan masuk ke akun My Finance  Anda.</p>
     </div>
 
     @if (session('status'))
@@ -9,7 +9,7 @@
             {{ session('status') }}
         </div>
     @endif
-    
+
     <form action="/login" method="POST" class="space-y-6">
         @csrf
         <!-- Email Field -->
@@ -26,7 +26,7 @@
                 <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
             @enderror
         </div>
-        
+
         <!-- Password Field -->
         <div class="space-y-2">
             <div class="flex justify-between items-center">
@@ -48,7 +48,7 @@
                 <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
             @enderror
         </div>
-        
+
         <!-- Options -->
         <div class="flex items-center justify-between">
             <label class="flex items-center gap-2 group cursor-pointer" for="remember">
@@ -65,7 +65,7 @@
             <a class="text-sm text-primary hover:text-primary-container transition-colors font-medium"
                 href="{{ route('password.request') }}">Lupa Kata Sandi?</a>
         </div>
-        
+
         <!-- Submit Button -->
         <button
             class="w-full py-4 accent-gradient text-[#07111f] font-semibold rounded-xl shadow-lg shadow-primary/20 hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4"
@@ -74,7 +74,7 @@
             <span class="material-symbols-outlined text-xl" data-icon="arrow_forward">arrow_forward</span>
         </button>
     </form>
-    
+
     <!-- Footer Links -->
     <div class="mt-12 text-center">
         <p class="text-on-surface-variant text-sm">

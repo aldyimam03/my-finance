@@ -1,11 +1,11 @@
-@props(['title' => 'My Finance - Obsidian Ledger', 'stats' => []])
+@props(['title' => 'My Finance', 'stats' => []])
 <!DOCTYPE html>
 <html class="dark" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>{{ $title ?? 'My Finance - Obsidian Ledger' }}</title>
+    <title>{{ $title ?? 'My Finance' }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet" />
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
@@ -46,7 +46,7 @@
                         <span class="text-primary">Kekayaan Pribadi.</span>
                     </h1>
                     <p class="text-on-surface-variant text-lg max-w-md leading-relaxed">
-                        Kelola aset Anda dengan presisi Obsidian Ledger. Keamanan perbankan swasta dalam genggaman Anda.
+                        Kelola aset Anda dengan My Finance. Keamanan dompet pribadi dalam genggaman Anda.
                     </p>
                 </div>
                 <!-- Subtle Data Point Visualization (Signature Component) -->
@@ -83,11 +83,10 @@
             </div>
             <!-- Branding Subtle Footer -->
             <div class="absolute bottom-12 left-12 lg:left-24">
-                <span class="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant/40">© {{ date('Y') }} Obsidian
-                    Technologies</span>
+                <span class="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant/40">© {{ date('Y') }} My Finance</span>
             </div>
         </section>
-        
+
         <!-- Right Side: Dynamic Content -->
         <section
             class="flex-1 flex items-center justify-center p-6 sm:p-12 lg:p-24 bg-surface md:bg-surface-container-low relative">
@@ -101,7 +100,7 @@
                     </div>
                     <span class="text-xl font-bold tracking-tight text-on-surface">My Finance</span>
                 </div>
-                
+
                 <!-- Main Slot Content -->
                 {{ $slot }}
 
