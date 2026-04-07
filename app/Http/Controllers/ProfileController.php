@@ -65,6 +65,13 @@ class ProfileController extends Controller
         return back()->with('status', 'password-updated');
     }
 
+    public function completeOnboarding(Request $request)
+    {
+        $request->user()->update(['onboarding_completed' => true]);
+
+        return back();
+    }
+
     public function destroy(Request $request)
     {
         $request->validateWithBag('userDeletion', [

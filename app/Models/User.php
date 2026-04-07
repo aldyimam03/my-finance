@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Storage;
     'notify_weekly_report',
     'notify_budget_alert',
     'notify_marketing_tips',
+    'onboarding_completed',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -40,6 +41,7 @@ class User extends Authenticatable
             'notify_weekly_report' => 'boolean',
             'notify_budget_alert' => 'boolean',
             'notify_marketing_tips' => 'boolean',
+            'onboarding_completed' => 'boolean',
         ];
     }
 
