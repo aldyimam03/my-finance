@@ -55,12 +55,13 @@ jobs:
           DB_DATABASE: database/database.sqlite
         run: php artisan migrate:fresh --seed --force
 
+      - name: Build frontend assets
+        run: npm run build
+
       - name: Run tests
         env:
           APP_ENV: testing
           DB_CONNECTION: sqlite
           DB_DATABASE: database/database.sqlite
         run: composer test
-
-      - name: Build frontend assets
-        run: npm run build
+      
