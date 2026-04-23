@@ -4,7 +4,11 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>{{ $title ?? 'Dashboard - My Finance' }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}" />
+    <link rel="shortcut icon" href="{{ asset('favicon.png') }}" />
+    <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <!-- Alpine.js -->
@@ -25,6 +29,10 @@
         /* Desktop: persist collapse. Mobile: always start closed */
         sidebarOpen: window.innerWidth >= 1024 ? localStorage.getItem('sidebarOpen') !== 'false' : false,
         mobileMenuOpen: false,
+        onboardingActive: @json(auth()->check() && !auth()->user()->onboarding_completed && request()->routeIs('dashboard')),
+        onboardingStep: 1,
+        onboardingStyle: { left: '0px', top: '0px', width: '0px', height: '0px' },
+        onboardingPulse: false,
         isMobile() { return window.innerWidth < 1024; },
         toggleSidebar() {
             if (this.isMobile()) {
@@ -34,8 +42,57 @@
                 localStorage.setItem('sidebarOpen', this.sidebarOpen);
             }
         },
-        closeMobileMenu() { this.mobileMenuOpen = false; }
+        closeMobileMenu() { this.mobileMenuOpen = false; },
+        setOnboardingHighlight() {
+            this.$nextTick(() => {
+                const link = this.$refs.categoryLink;
+                if (!link) return;
+                const rect = link.getBoundingClientRect();
+                this.onboardingStyle = {
+                    left: `${rect.left - 8}px`,
+                    top: `${rect.top - 8}px`,
+                    width: `${rect.width + 16}px`,
+                    height: `${rect.height + 16}px`,
+                };
+            });
+        },
+        startPulse() {
+            this.onboardingPulse = true;
+            setTimeout(() => this.onboardingPulse = false, 2000);
+        },
+        navigateToCategoryTour() {
+            this.onboardingActive = false;
+            setTimeout(() => {
+                window.location = '{{ route('categories', ['tour' => 1]) }}';
+            }, 200);
+        },
+        skipOnboarding() {
+            this.onboardingActive = false;
+            fetch('{{ route('onboarding.complete') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({})
+            });
+        },
+        init() {
+            if (this.onboardingActive) {
+                if (!this.isMobile()) {
+                    this.sidebarOpen = true;
+                    localStorage.setItem('sidebarOpen', true);
+                }
+                this.setOnboardingHighlight();
+                window.addEventListener('resize', () => this.setOnboardingHighlight());
+
+                // Start pulse animation after modal appears
+                setTimeout(() => this.startPulse(), 500);
+            }
+        }
     }"
+    x-init="init()"
     @keydown.escape="isTransactionModalOpen = false; mobileMenuOpen = false"
     :class="isTransactionModalOpen ? 'overflow-hidden' : ''"
 >
@@ -107,6 +164,7 @@
                 href="{{ route($item['route']) }}"
                 @click="if(isMobile()) closeMobileMenu()"
                 title="{{ $item['label'] }}"
+                {{ $item['route'] === 'categories' ? 'x-ref="categoryLink"' : '' }}
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative
                     {{ $active ? 'text-primary bg-primary/10 font-semibold' : 'text-[#e5e2e1]/60 hover:text-[#e5e2e1] hover:bg-white/5' }}"
             >
@@ -164,6 +222,26 @@
             </form>
         </div>
     </aside>
+
+    <div x-show="onboardingActive" x-cloak style="display:none" class="fixed inset-0 z-[1000] pointer-events-none">
+        <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm transition-all duration-500 ease-out" x-show="onboardingActive" x-transition:enter="opacity-100" x-transition:leave="opacity-0"></div>
+        <div class="absolute rounded-3xl border-2 border-primary/90 shadow-[0_0_0_20px_rgba(99,102,241,0.08)] pointer-events-none transition-all duration-300" :class="{ 'onboarding-highlight': onboardingPulse }" :style="onboardingStyle"></div>
+        <div class="relative flex items-center justify-center min-h-screen p-4 pointer-events-auto">
+            <div class="w-full max-w-md rounded-3xl bg-surface-container-low border border-white/10 p-6 shadow-2xl transform transition-all duration-500 ease-out scale-95 opacity-0 onboarding-modal" x-show="onboardingActive" x-transition:enter="scale-100 opacity-100" x-transition:leave="scale-95 opacity-0">
+                <div class="flex items-start gap-3 mb-4">
+                    <span class="material-symbols-outlined text-[28px] text-primary onboarding-icon">lightbulb</span>
+                    <div>
+                        <h3 class="text-lg font-semibold text-on-surface">Panduan Kategori</h3>
+                        <p class="text-sm text-on-surface-variant mt-1">Selamat datang! Klik menu Kategori untuk mulai membuat label transaksi. Dengan kategori, semua pengeluaran dan pemasukan akan lebih mudah dipantau.</p>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button type="button" @click="navigateToCategoryTour()" class="flex-1 px-5 py-3 bg-primary text-on-primary rounded-xl font-semibold transition-all duration-200 hover:bg-primary/90 hover:scale-105 active:scale-95 shadow-lg shadow-primary/20">Lanjutkan Tour</button>
+                    <button type="button" @click="skipOnboarding()" class="flex-1 px-5 py-3 border border-white/10 rounded-xl text-on-surface font-semibold transition-all duration-200 hover:bg-white/5 hover:scale-105 active:scale-95">Lewati</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- ===== TopNavBar ===== -->
     <header

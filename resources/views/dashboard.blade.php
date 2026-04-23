@@ -89,7 +89,10 @@
         <!-- Budget & Wallets -->
         <div class="lg:col-span-4 space-y-4 md:space-y-6">
             <div class="bg-surface-container-low p-6 rounded-xl border border-white/5">
-                <h3 class="text-sm font-semibold mb-6">Analisis Anggaran</h3>
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-sm font-semibold">Analisis Anggaran</h3>
+                    <a href="{{ route('budgets') }}" class="text-[10px] uppercase font-bold text-primary tracking-widest hover:text-primary-container transition-colors">Lihat Semua</a>
+                </div>
                 <div class="space-y-6">
                     @forelse($budgets as $budget)
                     <div>

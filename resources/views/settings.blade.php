@@ -18,10 +18,6 @@
                 <p class="text-primary font-medium text-sm uppercase tracking-wider mb-2">Akun Saya</p>
                 <h2 class="text-4xl font-bold tracking-tight text-on-surface">Pengaturan Profil</h2>
             </div>
-            <div class="bg-surface-container-high px-4 py-2 rounded-full border border-white/5 flex items-center gap-2">
-                <span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
-                <span class="text-[12px] font-bold text-on-surface uppercase tracking-wider">Status Keanggotaan: <span class="text-primary">Obsidian Tier</span></span>
-            </div>
         </header>
 
         <!-- Bento Grid Layout -->
@@ -79,28 +75,11 @@
                                 </div>
                                 <div>
                                     <p class="font-medium text-sm">Kata Sandi</p>
-                                    <p class="text-[12px] text-on-surface-variant">Terakhir diubah 3 bulan lalu</p>
+                                    <p class="text-[12px] text-on-surface-variant">Perbarui kata sandi secara berkala untuk menjaga keamanan akun.</p>
                                 </div>
                             </div>
                             <button type="button" @click="isPasswordModalOpen = true" class="px-4 py-2 text-primary font-medium hover:bg-primary/10 rounded-lg transition-colors text-sm w-full sm:w-auto mt-2 sm:mt-0">Ubah Sandi</button>
                         </div>
-                        <label for="2fa-toggle" class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-xl border border-white/5 hover:border-white/10 transition-colors cursor-pointer group">
-                            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full justify-between">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center shrink-0">
-                                        <span class="material-symbols-outlined text-sm">vibration</span>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-sm">Autentikasi 2-Faktor (2FA)</p>
-                                        <p class="text-[12px] text-on-surface-variant mt-0.5">Amankan akun dengan verifikasi tambahan</p>
-                                    </div>
-                                </div>
-                                <span class="relative inline-flex items-center cursor-pointer mt-3 sm:mt-0 shrink-0">
-                                    <input id="2fa-toggle" checked="" class="sr-only peer" type="checkbox"/>
-                                    <div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
-                                </span>
-                            </div>
-                        </label>
                         
                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-red-500/10 rounded-xl border border-red-500/20 gap-4 hover:border-red-500/30 transition-colors mt-6">
                             <div class="flex items-center gap-4">
@@ -129,21 +108,19 @@
                     <div class="space-y-6">
                         <div class="space-y-2">
                             <label class="text-sm font-medium uppercase tracking-widest text-on-surface-variant">Mata Uang Utama</label>
-                            <div class="relative">
+                            <div>
                                 <select name="currency" class="w-full bg-surface-container-lowest border border-white/5 rounded-xl px-4 py-3 text-on-surface appearance-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-colors outline-none cursor-pointer">
                                     <option value="IDR" class="bg-surface-container" {{ old('currency', auth()->user()->currency ?? 'IDR') === 'IDR' ? 'selected' : '' }}>IDR - Rupiah Indonesia</option>
                                 </select>
-                                <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">expand_more</span>
                             </div>
                             @error('currency') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-medium uppercase tracking-widest text-on-surface-variant">Bahasa Aplikasi</label>
-                            <div class="relative">
+                            <div>
                                 <select name="locale" class="w-full bg-surface-container-lowest border border-white/5 rounded-xl px-4 py-3 text-on-surface appearance-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-colors outline-none cursor-pointer">
                                     <option value="id" class="bg-surface-container" {{ old('locale', auth()->user()->locale ?? 'id') === 'id' ? 'selected' : '' }}>Bahasa Indonesia</option>
                                 </select>
-                                <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">expand_more</span>
                             </div>
                             @error('locale') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
@@ -159,8 +136,8 @@
                     <div class="space-y-6">
                         <label for="notif-1" class="flex items-center justify-between group cursor-pointer">
                             <div>
-                                <p class="font-medium text-sm group-hover:text-primary transition-colors">Laporan Mingguan</p>
-                                <p class="text-[11px] text-on-surface-variant mt-0.5">Terima ringkasan finansial</p>
+                                <p class="font-medium text-sm group-hover:text-primary transition-colors">Ringkasan Bulanan</p>
+                                <p class="text-[11px] text-on-surface-variant mt-0.5">Terima ringkasan pemasukan dan pengeluaran bulan berjalan</p>
                             </div>
                             <span class="relative inline-flex items-center cursor-pointer shrink-0">
                                 <input type="hidden" name="notify_weekly_report" value="0" />
@@ -182,7 +159,7 @@
                         <label for="notif-3" class="flex items-center justify-between opacity-50 hover:opacity-100 transition-opacity cursor-pointer group">
                             <div>
                                 <p class="font-medium text-sm group-hover:text-primary transition-colors">Tips Finansial</p>
-                                <p class="text-[11px] text-on-surface-variant mt-0.5">Rekomendasi dan insight produk di masa depan</p>
+                                <p class="text-[11px] text-on-surface-variant mt-0.5">Tampilkan insight dari pola transaksi dan pengeluaran terbaru</p>
                             </div>
                             <span class="relative inline-flex items-center cursor-pointer shrink-0">
                                 <input type="hidden" name="notify_marketing_tips" value="0" />
@@ -204,12 +181,6 @@
                 </div>
             </section>
         </form>
-
-        <!-- Footnote -->
-        <footer class="mt-24 pb-8 text-center border-t border-white/5 pt-8">
-            <p class="text-[12px] text-on-surface-variant opacity-40">My Finance Obsidian Edition &copy; {{ date('Y') }}. Melindungi privasi Anda adalah prioritas kami.</p>
-        </footer>
-
         <!-- Delete Account Modal -->
         <div x-cloak x-show="isDeleteModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div x-show="isDeleteModalOpen" x-transition.opacity.duration.300ms @click="isDeleteModalOpen = false" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>

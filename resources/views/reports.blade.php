@@ -12,7 +12,7 @@
                 <form method="GET" action="{{ route('reports') }}" id="monthForm">
                     <div class="glass-card flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10">
                         <span class="material-symbols-outlined text-[20px] text-primary">calendar_month</span>
-                        <select name="month" onchange="document.getElementById('monthForm').submit()" class="bg-transparent border-none text-sm font-medium focus:ring-0 cursor-pointer text-on-surface outline-none pr-4">
+                        <select name="month" data-modal-title="Periode Laporan" onchange="document.getElementById('monthForm').submit()" class="bg-transparent border-none text-sm font-medium focus:ring-0 cursor-pointer text-on-surface outline-none pr-4">
                             @foreach($monthOptions as $opt)
                                 <option value="{{ $opt['value'] }}" {{ $opt['value'] === $month ? 'selected' : '' }} class="bg-surface-container">
                                     {{ $opt['label'] }}

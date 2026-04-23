@@ -13,7 +13,10 @@ class TransactionController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Auth::user()->transactions()->with(['wallet', 'category', 'toWallet']);
+        $query = Auth::user()
+            ->transactions()
+            ->select('transactions.*')
+            ->with(['wallet', 'category', 'toWallet']);
         $sortBy = $request->input('sort_by', 'date');
         $sortDir = $request->input('sort_dir', 'desc');
 
@@ -39,34 +42,27 @@ class TransactionController extends Controller
             $sortDir = 'desc';
         }
 
-        $transactions = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->get()
-            ->sortBy(
-                fn (Transaction $transaction) => match ($sortBy) {
-                    'description' => strtolower((string) ($transaction->description ?? '')),
-                    'category' => strtolower((string) ($transaction->category->name ?? '')),
-                    'wallet' => strtolower((string) ($transaction->wallet->name ?? '')),
-                    'amount' => (float) $transaction->amount,
-                    'type' => strtolower((string) $transaction->type),
-                    default => $transaction->date?->timestamp ?? 0,
-                },
-                options: SORT_NATURAL,
-                descending: $sortDir === 'desc'
-            )
-            ->values();
+        match ($sortBy) {
+            'category' => $query
+                ->leftJoin('categories as sort_categories', 'transactions.category_id', '=', 'sort_categories.id')
+                ->orderBy('sort_categories.name', $sortDir),
+            'wallet' => $query
+                ->leftJoin('wallets as sort_wallets', 'transactions.wallet_id', '=', 'sort_wallets.id')
+                ->orderBy('sort_wallets.name', $sortDir),
+            'description' => $query->orderBy('transactions.description', $sortDir),
+            'amount' => $query->orderBy('transactions.amount', $sortDir),
+            'type' => $query->orderBy('transactions.type', $sortDir),
+            default => $query->orderBy('transactions.date', $sortDir),
+        };
 
-        $perPage = 10;
-        $currentPage = LengthAwarePaginator::resolveCurrentPage();
-        $currentItems = $transactions->slice(($currentPage - 1) * $perPage, $perPage)->values();
-        $transactions = new LengthAwarePaginator(
-            $currentItems,
-            $transactions->count(),
-            $perPage,
-            $currentPage,
-            [
-                'path' => $request->url(),
-                'query' => $request->query(),
-            ]
-        );
+        if ($sortBy !== 'date') {
+            $query->orderBy('transactions.date', 'desc');
+        }
+
+        $transactions = $query
+            ->orderBy('transactions.created_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
 
         $wallets = Auth::user()->wallets()->get();
         $categories = Auth::user()->categories()->get();
@@ -82,8 +78,10 @@ class TransactionController extends Controller
 
         DB::transaction(function () use ($validated, $wallet) {
             $transaction = Auth::user()->transactions()->create($validated);
+            $toWallet = $validated['to_wallet_id'] ? Auth::user()->wallets()->findOrFail($validated['to_wallet_id']) : null;
 
-            $this->applyTransactionEffect($transaction, $wallet, $validated['to_wallet_id'] ? Auth::user()->wallets()->findOrFail($validated['to_wallet_id']) : null);
+            $this->assertTransactionAffordable($validated['type'], $wallet, (float) $validated['amount']);
+            $this->applyTransactionEffect($transaction, $wallet, $toWallet);
         });
 
         return redirect()->back()->with('success', 'Transaksi berhasil dicatat.');
@@ -102,6 +100,8 @@ class TransactionController extends Controller
                 : null;
 
             $this->revertTransactionEffect($transaction, $oldWallet, $oldToWallet);
+            $oldWallet->refresh();
+            $oldToWallet?->refresh();
 
             $transaction->update($validated);
 
@@ -110,6 +110,7 @@ class TransactionController extends Controller
                 ? Auth::user()->wallets()->findOrFail($transaction->to_wallet_id)
                 : null;
 
+            $this->assertTransactionAffordable($transaction->type, $newWallet, (float) $transaction->amount);
             $this->applyTransactionEffect($transaction, $newWallet, $newToWallet);
         });
 
@@ -208,6 +209,19 @@ class TransactionController extends Controller
         if ($transaction->type === 'transfer' && $toWallet) {
             $wallet->increment('balance', $transaction->amount);
             $toWallet->decrement('balance', $transaction->amount);
+        }
+    }
+
+    private function assertTransactionAffordable(string $type, $wallet, float $amount): void
+    {
+        if (! in_array($type, ['expense', 'transfer'], true)) {
+            return;
+        }
+
+        $wallet->refresh();
+
+        if ((float) $wallet->balance < $amount) {
+            abort(422, 'Saldo dompet tidak mencukupi untuk transaksi ini.');
         }
     }
 }

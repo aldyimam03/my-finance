@@ -23,6 +23,11 @@ class NotificationComposer
         $currentPeriod = $now->format('Y-m');
         $startOfMonth  = $now->copy()->startOfMonth();
         $endOfMonth    = $now->copy()->endOfMonth();
+        $latestSignalAt = collect([
+            $user->transactions()->latest('updated_at')->value('updated_at'),
+            $user->budgets()->latest('updated_at')->value('updated_at'),
+            $user->updated_at,
+        ])->filter()->map(fn ($value) => Carbon::parse($value))->max() ?? $now;
 
         // Baca preferensi dari DB (default true jika kolom belum ada)
         $wantBudgetAlert  = (bool) ($user->notify_budget_alert  ?? true);
@@ -66,7 +71,7 @@ class NotificationComposer
             }
         }
 
-        // 2. Ringkasan Bulanan — hanya jika "Laporan Mingguan" diaktifkan di pengaturan
+        // 2. Ringkasan Bulanan — hanya jika diaktifkan di pengaturan
         if ($wantWeeklyReport) {
             $income = $user->transactions()
                 ->where('type', 'income')
@@ -128,9 +133,11 @@ class NotificationComposer
             ]);
         }
 
-        // Cek status sudah dibaca (via session timestamp)
-        $readAt     = session('notif_read_at', 0);
-        $isRead     = $readAt >= $now->copy()->startOfHour()->timestamp;
+        // Cek status sudah dibaca secara persisten per user
+        $readAt = $user->notif_read_at;
+        $isRead = $readAt instanceof Carbon
+            ? $readAt->greaterThanOrEqualTo($latestSignalAt)
+            : ($readAt ? Carbon::parse($readAt)->greaterThanOrEqualTo($latestSignalAt) : false);
         $alertCount = $notifications->where('type', '!=', 'success')->count();
 
         $view->with('notifications', $notifications);

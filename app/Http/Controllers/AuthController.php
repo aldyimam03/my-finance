@@ -53,6 +53,7 @@ class AuthController extends Controller
             'notify_weekly_report' => true,
             'notify_budget_alert' => true,
             'notify_marketing_tips' => false,
+            'onboarding_completed' => false,
         ]);
 
         Auth::login($user);

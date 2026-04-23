@@ -1,31 +1,209 @@
 <x-app-layout title="Kategori - My Finance">
 
-    <div x-data="{
-        showAddModal: false,
-        editModal: false,
-        editData: { id: null, name: '' },
-        openEdit(id, name) {
-            this.editData = { id, name };
-            this.editModal = true;
-        }
-    }">
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('categoriesTour', () => ({
+                showAddModal: false,
+                editModal: false,
+                showTour: @json(request('tour') === '1' && auth()->check() && !auth()->user()->onboarding_completed),
+                tourStep: 1,
+                tourSteps: [
+                    { ref: 'sidebarCategory', title: 'Menu Kategori', text: 'Klik menu ini untuk membuka halaman pengelolaan kategori transaksi.' },
+                    { ref: 'tourHeader', title: 'Halaman Kategori', text: 'Di sini kamu dapat membuat dan mengelola kategori transaksi seperti Belanja, Gaji, atau Investasi.' },
+                    { ref: 'tourTotal', title: 'Total Kategori', text: 'Card ini menampilkan jumlah kategori yang sudah kamu buat.' },
+                    { ref: 'tourAddButton', title: 'Tambah Kategori Baru', text: 'Gunakan tombol ini untuk menambahkan kategori transaksi baru.' },
+                    { ref: 'tourCategoryList', title: 'Daftar Kategori', text: 'Semua kategori yang sudah dibuat akan muncul di bagian ini.' },
+                    { ref: 'tourAddButton', title: 'Akses Cepat', text: 'Tombol ini adalah shortcut untuk menambahkan kategori dengan cepat.' }
+                ],
+                tourHighlight: { left: '0px', top: '0px', width: '0px', height: '0px' },
+                tooltipStyle: { top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'min(95vw, 30rem)' },
+                editData: { id: null, name: '' },
+                openEdit(id, name) {
+                    this.editData = { id, name };
+                    this.editModal = true;
+                },
+                openAddModal() {
+                    this.showAddModal = true;
+                },
+                get activeTourStep() {
+                    return this.tourSteps[this.tourStep - 1];
+                },
+                setTourHighlight() {
+                    this.$nextTick(() => {
+                        const refName = this.activeTourStep?.ref;
+                        let target = this.$refs[refName];
+
+                        if (!target && refName === 'sidebarCategory') {
+                            target = document.querySelector('a[title="Kategori"]');
+                        }
+
+                        if (!target) {
+                            return;
+                        }
+
+                        const targetRect = target.getBoundingClientRect();
+                        const topNav = document.querySelector('header');
+                        const headerOffset = topNav ? topNav.getBoundingClientRect().height + 12 : 80;
+                        const offscreen = targetRect.top < headerOffset || targetRect.bottom > window.innerHeight - 16;
+                        if (offscreen) {
+                            target.scrollIntoView({ block: 'center', behavior: 'auto' });
+                        }
+
+                        let rect = target.getBoundingClientRect();
+                        if (rect.top < headerOffset) {
+                            window.scrollBy({ top: rect.top - headerOffset, behavior: 'auto' });
+                            rect = target.getBoundingClientRect();
+                        }
+
+                        const padding = 14;
+                        const tooltipWidth = Math.min(300, window.innerWidth - 48);
+                        const tooltipHeight = 165;
+                        const spaceRight = window.innerWidth - rect.right - padding;
+                        const spaceLeft = rect.left - padding;
+                        const spaceBottom = window.innerHeight - rect.bottom - padding;
+                        const placeLeft = spaceRight < tooltipWidth && spaceLeft > tooltipWidth;
+                        const placeAbove = rect.top > tooltipHeight + padding;
+                        const placeBelow = spaceBottom > tooltipHeight;
+
+                        let tooltipLeft = placeLeft ? rect.left - tooltipWidth - padding : rect.right + padding;
+                        tooltipLeft = Math.max(16, Math.min(tooltipLeft, window.innerWidth - tooltipWidth - 16));
+
+                        let tooltipTop;
+                        if (placeBelow) {
+                            tooltipTop = rect.bottom + padding;
+                        } else if (placeAbove) {
+                            tooltipTop = rect.top - tooltipHeight - padding;
+                        } else {
+                            tooltipTop = Math.max(16, Math.min(rect.top + rect.height / 2 - tooltipHeight / 2, window.innerHeight - tooltipHeight - 16));
+                        }
+
+                        this.tourHighlight = {
+                            left: `${rect.left - 12}px`,
+                            top: `${rect.top - 12}px`,
+                            width: `${rect.width + 24}px`,
+                            height: `${rect.height + 24}px`,
+                        };
+                        this.tooltipStyle = {
+                            position: 'fixed',
+                            top: `${tooltipTop}px`,
+                            left: `${tooltipLeft}px`,
+                            transform: 'none',
+                            width: `${tooltipWidth}px`,
+                            'max-width': `${tooltipWidth}px`,
+                        };
+                    });
+                },
+                nextTourStep() {
+                    if (this.tourStep < this.tourSteps.length) {
+                        this.tourStep++;
+                        this.setTourHighlight();
+                    }
+                },
+                prevTourStep() {
+                    if (this.tourStep > 1) {
+                        this.tourStep--;
+                        this.setTourHighlight();
+                    }
+                },
+                skipTour() {
+                    this.showTour = false;
+                    document.body.style.overflow = '';
+                    document.documentElement.style.overflow = '';
+                    fetch(@json(route('onboarding.complete')), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': @json(csrf_token()),
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    }).finally(() => {
+                        history.replaceState(null, '', @json(route('categories')));
+                    });
+                },
+                finishTour() {
+                    this.showTour = false;
+                    document.body.style.overflow = '';
+                    document.documentElement.style.overflow = '';
+                    fetch(@json(route('onboarding.complete')), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': @json(csrf_token()),
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    }).finally(() => {
+                        history.replaceState(null, '', @json(route('categories')));
+                    });
+                },
+                init() {
+                    this.$watch('showTour', value => {
+                        document.body.style.overflow = value ? 'hidden' : '';
+                    });
+
+                    if (this.showTour) {
+                        if (window.innerWidth >= 1024) {
+                            window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                        }
+                        this.setTourHighlight();
+                        window.addEventListener('resize', () => this.setTourHighlight());
+                        setTimeout(() => {
+                            document.body.style.overflow = 'hidden';
+                            document.documentElement.style.overflow = 'hidden';
+                        }, 150);
+                    }
+                }
+            }));
+        });
+    </script>
+
+    <div x-data="categoriesTour()" x-init="init()">
 
         <!-- Header -->
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-            <div>
+            <div x-ref="tourHeader">
                 <span class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant block mb-2">Manajemen Data</span>
                 <h2 class="font-['Inter'] text-3xl font-bold tracking-tight text-on-surface">Kategori Transaksi</h2>
                 <p class="text-on-surface-variant/70 text-sm mt-1">Buat label kategori sendiri untuk mengorganisir transaksi Anda.</p>
             </div>
-            <button @click="showAddModal = true"
+            <button x-ref="tourAddButton" @click="openAddModal()"
                 class="px-6 py-3 bg-primary text-on-primary font-bold rounded-xl flex items-center gap-2 shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0">
                 <span class="material-symbols-outlined">add</span>
                 Tambah Kategori
             </button>
         </div>
 
+        <div x-show="showTour" x-cloak style="display:none" class="fixed inset-0 z-50 pointer-events-none">
+            <div class="absolute inset-0 bg-black/20"></div>
+            <div class="absolute rounded-3xl border-2 border-primary/90 bg-transparent shadow-[0_0_0_9999px_rgba(0,0,0,0.75)] pointer-events-none transition-all duration-300" :style="tourHighlight"></div>
+            <div class="absolute pointer-events-auto z-50" :style="tooltipStyle">
+                <div class="rounded-3xl bg-surface-container-low border border-white/10 p-5 shadow-2xl w-full min-w-72 max-w-96">
+                    <div class="flex items-start gap-3 mb-4">
+                        <span class="material-symbols-outlined text-[28px] text-primary onboarding-icon">lightbulb</span>
+                        <div>
+                            <h3 class="text-lg font-semibold text-on-surface" x-text="activeTourStep.title"></h3>
+                            <p class="text-sm text-on-surface-variant mt-1" x-text="activeTourStep.text"></p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-3 text-sm">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button type="button" @click="skipTour()" class="px-2.5 py-2 rounded-xl border border-white/10 text-on-surface-variant hover:bg-white/5 transition text-xs">Lewati</button>
+                                <button type="button" @click="prevTourStep()" class="px-2.5 py-2 rounded-xl border border-white/10 text-on-surface-variant hover:bg-white/5 transition text-xs" x-show="tourStep > 1">Sebelumnya</button>
+                                <button type="button" @click="tourStep < tourSteps.length ? nextTourStep() : finishTour()" class="px-3 py-2 rounded-xl bg-primary text-on-primary font-semibold hover:bg-primary/90 transition text-xs whitespace-nowrap">
+                                    <span x-text="tourStep < tourSteps.length ? 'Berikutnya' : 'Selesai'"></span>
+                                </button>
+                            </div>
+                            <div class="text-[11px] text-on-surface-variant text-right">Langkah <span x-text="tourStep"></span> / <span x-text="tourSteps.length"></span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Stat -->
-        <div class="bg-surface-container-low border border-white/5 rounded-2xl p-5 flex items-center gap-4 mb-8 w-fit">
+        <div x-ref="tourTotal" class="bg-surface-container-low border border-white/5 rounded-2xl p-5 flex items-center gap-4 mb-8 w-fit">
             <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                 <span class="material-symbols-outlined text-primary">category</span>
             </div>
@@ -36,7 +214,7 @@
         </div>
 
         <!-- Daftar Kategori -->
-        <div class="bg-surface-container-low border border-white/5 rounded-3xl">
+        <div x-ref="tourCategoryList" class="bg-surface-container-low border border-white/5 rounded-3xl">
             <div class="px-6 py-4 border-b border-white/5 flex items-center gap-3">
                 <span class="material-symbols-outlined text-on-surface-variant">label</span>
                 <h3 class="font-semibold text-sm">Semua Kategori</h3>
