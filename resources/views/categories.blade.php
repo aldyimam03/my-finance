@@ -109,7 +109,17 @@
                     this.showTour = false;
                     document.body.style.overflow = '';
                     document.documentElement.style.overflow = '';
-                    history.replaceState(null, '', @json(route('categories')));
+                    fetch(@json(route('onboarding.complete')), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': @json(csrf_token()),
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    }).finally(() => {
+                        history.replaceState(null, '', @json(route('categories')));
+                    });
                 },
                 finishTour() {
                     this.showTour = false;

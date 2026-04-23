@@ -66,6 +66,18 @@
                 window.location = '{{ route('categories', ['tour' => 1]) }}';
             }, 200);
         },
+        skipOnboarding() {
+            this.onboardingActive = false;
+            fetch('{{ route('onboarding.complete') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({})
+            });
+        },
         init() {
             if (this.onboardingActive) {
                 if (!this.isMobile()) {
@@ -225,7 +237,7 @@
                 </div>
                 <div class="flex flex-col sm:flex-row gap-3">
                     <button type="button" @click="navigateToCategoryTour()" class="flex-1 px-5 py-3 bg-primary text-on-primary rounded-xl font-semibold transition-all duration-200 hover:bg-primary/90 hover:scale-105 active:scale-95 shadow-lg shadow-primary/20">Lanjutkan Tour</button>
-                    <button type="button" @click="onboardingActive = false" class="flex-1 px-5 py-3 border border-white/10 rounded-xl text-on-surface font-semibold transition-all duration-200 hover:bg-white/5 hover:scale-105 active:scale-95">Tutup</button>
+                    <button type="button" @click="skipOnboarding()" class="flex-1 px-5 py-3 border border-white/10 rounded-xl text-on-surface font-semibold transition-all duration-200 hover:bg-white/5 hover:scale-105 active:scale-95">Lewati</button>
                 </div>
             </div>
         </div>
