@@ -1,79 +1,110 @@
 # My Finance
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-Aplikasi manajemen keuangan pribadi berbasis web yang dibangun dengan Laravel.
+[![CI](https://github.com/aldyimam03/my-finance/actions/workflows/ci.yml/badge.svg)](https://github.com/aldyimam03/my-finance/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-## Fitur Utama
+Aplikasi manajemen keuangan pribadi berbasis web (Laravel) untuk mencatat transaksi, dompet, kategori, dan anggaran.
 
-- **Manajemen Akun Pengguna**
-  - Sistem reset password dengan notifikasi email
-  - Template email untuk reset password
+## Fitur
 
-- **Fitur Pencarian**
-  - Pencarian dengan hasil dan saran otomatis
+- Autentikasi + reset password via email
+- Pencarian transaksi/laporan dengan saran otomatis
+- UI modern (Vite) dengan layout guest + dashboard
+- Seed data untuk development
 
-- **Antarmuka Pengguna**
-  - Tampilan untuk tamu (guest layout)
-  - Halaman welcome yang informatif
-  - Favicon dan apple touch icon untuk branding
+## Teknologi
 
-## Instalasi
+- Laravel + Blade
+- Vite (build assets)
+- Tailwind CSS
 
-1. Clone repository ini
-2. Install dependency: `composer install` dan `npm install`
-3. Buat file `.env` dari `.env.example` lalu sesuaikan bila perlu
-4. Jalankan `php artisan key:generate`
-5. Migrasi + seed database: `php artisan migrate:fresh --seed`
-6. Build asset: `npm run build`
-7. Jalankan server: `php artisan serve`
+## Quick Start (Local)
+
+### Prasyarat
+
+- PHP + Composer
+- Node.js + npm
+- Database (default: SQLite)
+
+### Setup
+
+Linux/macOS:
+
+```bash
+composer install
+npm install
+
+cp .env.example .env
+php artisan key:generate
+
+php artisan migrate:fresh --seed
+npm run build
+php artisan serve
+```
+
+Windows (PowerShell):
+
+```powershell
+composer install
+npm install
+
+Copy-Item .env.example .env
+php artisan key:generate
+
+php artisan migrate:fresh --seed
+npm run build
+php artisan serve
+```
+
+## Testing
+
+```bash
+composer test
+```
 
 ## Alur Branch & CI
 
-Repository ini memakai alur promosi branch berikut:
+Branch yang dipakai:
 
-- `development` untuk kerja harian
-- `staging` untuk kandidat rilis
-- `main` untuk rilis production
+- `development`: kerja harian
+- `staging`: kandidat rilis
+- `main`: production
 
-Workflow GitHub Actions yang sudah disiapkan:
+Workflow yang tersedia:
 
-- `CI` akan jalan di `development`, `staging`, dan `main`
-- push ke `development` akan membuat PR promosi ke `staging`
-- push ke `staging` akan membuat PR promosi ke `main`
+- `CI` jalan di `development`, `staging`, `main`
+- `Promote Branches` membuat PR promosi:
+  - push ke `development` -> PR ke `staging`
+  - push ke `staging` -> PR ke `main`
 
 File workflow:
 
 - `.github/workflows/ci.yml`
 - `.github/workflows/promote-branches.yml`
 
-### GitHub Settings yang harus diaktifkan
+### Branch Protection (Disarankan)
 
-Lakukan ini di GitHub repository settings:
+Atur di GitHub:
 
-1. Buka `Settings -> Branches`
-2. Tambahkan branch protection rule untuk `staging`
-3. Tambahkan branch protection rule untuk `main`
-4. Aktifkan `Require a pull request before merging`
-5. Aktifkan `Require status checks to pass before merging`
-6. Pilih status check `CI / test-and-build`
-7. Aktifkan `Restrict who can push to matching branches` bila diperlukan
-8. Nonaktifkan direct push ke `staging` dan `main` untuk developer biasa
+1. `Settings -> Branches`
+2. Buat rule untuk `staging` dan `main`
+3. Aktifkan `Require a pull request before merging`
+4. Aktifkan `Require status checks to pass before merging`
+5. Pilih status check `CI / test-and-build`
 
-Catatan untuk workflow promosi:
-- Jika GitHub menolak pembuatan PR dari GitHub Actions (error `GitHub Actions is not permitted to create or approve pull requests`), aktifkan `Settings -> Actions -> General -> Workflow permissions` ke `Read and write permissions` dan centang `Allow GitHub Actions to create and approve pull requests`.
-- Alternatif tanpa mengubah setting di atas: buat secret repo bernama `PROMOTION_TOKEN` berisi Personal Access Token (PAT) yang punya akses `pull requests` dan `contents`, lalu workflow akan otomatis memakai token tersebut.
+### Permission Untuk Workflow Promosi
 
-### Flow kerja yang disarankan
+Jika muncul error `GitHub Actions is not permitted to create or approve pull requests`:
 
-1. Kerja dan merge perubahan ke `development`
-2. Setelah push ke `development`, review PR promosi `development -> staging`
-3. Setelah lolos verifikasi staging, merge ke `staging`
-4. Setelah push ke `staging`, review PR promosi `staging -> main`
-5. Merge ke `main` hanya setelah final verification
+1. `Settings -> Actions -> General -> Workflow permissions`
+2. Pilih `Read and write permissions`
+3. Centang `Allow GitHub Actions to create and approve pull requests`
+
+Alternatif (lebih stabil): buat repo secret `PROMOTION_TOKEN` berisi PAT yang punya akses `Contents` + `Pull requests`.
 
 ## Kontribusi
 
-Kontribusi dipersilakan! Silakan buka issue atau pull request untuk saran dan perbaikan.
+Issue dan pull request dipersilakan.
 
 ## Lisensi
 
