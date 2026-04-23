@@ -1,0 +1,81 @@
+name: Promote Branches
+
+on:
+  push:
+    branches:
+      - development
+      - staging
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: Source branch to promote
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  open-promotion-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Resolve source branch
+        id: source
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "branch=${{ github.event.inputs.source_branch }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "branch=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Resolve promotion target
+        id: target
+        shell: bash
+        run: |
+          case "${{ steps.source.outputs.branch }}" in
+            development)
+              echo "branch=staging" >> "$GITHUB_OUTPUT"
+              echo "title=Promote development to staging" >> "$GITHUB_OUTPUT"
+              ;;
+            staging)
+              echo "branch=main" >> "$GITHUB_OUTPUT"
+              echo "title=Promote staging to main" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unsupported source branch: ${{ steps.source.outputs.branch }}"
+              exit 1
+              ;;
+          esac
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create or reuse promotion PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          SOURCE="${{ steps.source.outputs.branch }}"
+          TARGET="${{ steps.target.outputs.branch }}"
+          TITLE="${{ steps.target.outputs.title }}"
+
+          EXISTING_PR="$(gh pr list --base "$TARGET" --head "$SOURCE" --state open --json number --jq '.[0].number')"
+
+          if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
+            echo "Promotion PR already exists: #$EXISTING_PR"
+            exit 0
+          fi
+
+          gh pr create \
+            --base "$TARGET" \
+            --head "$SOURCE" \
+            --title "$TITLE" \
+            --body "Automated promotion PR from \`$SOURCE\` to \`$TARGET\`."

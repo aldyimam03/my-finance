@@ -1,5 +1,4 @@
 # My Finance
-
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 Aplikasi manajemen keuangan pribadi berbasis web yang dibangun dengan Laravel.
@@ -21,11 +20,52 @@ Aplikasi manajemen keuangan pribadi berbasis web yang dibangun dengan Laravel.
 ## Instalasi
 
 1. Clone repository ini
-2. Jalankan `composer install`
-3. Buat file `.env` dari `.env.example` dan konfigurasikan
+2. Install dependency: `composer install` dan `npm install`
+3. Buat file `.env` dari `.env.example` lalu sesuaikan bila perlu
 4. Jalankan `php artisan key:generate`
-5. Migrasi database: `php artisan migrate`
-6. Jalankan server: `php artisan serve`
+5. Migrasi + seed database: `php artisan migrate:fresh --seed`
+6. Build asset: `npm run build`
+7. Jalankan server: `php artisan serve`
+
+## Alur Branch & CI
+
+Repository ini memakai alur promosi branch berikut:
+
+- `development` untuk kerja harian
+- `staging` untuk kandidat rilis
+- `main` untuk rilis production
+
+Workflow GitHub Actions yang sudah disiapkan:
+
+- `CI` akan jalan di `development`, `staging`, dan `main`
+- push ke `development` akan membuat PR promosi ke `staging`
+- push ke `staging` akan membuat PR promosi ke `main`
+
+File workflow:
+
+- `.github/workflows/ci.yml`
+- `.github/workflows/promote-branches.yml`
+
+### GitHub Settings yang harus diaktifkan
+
+Lakukan ini di GitHub repository settings:
+
+1. Buka `Settings -> Branches`
+2. Tambahkan branch protection rule untuk `staging`
+3. Tambahkan branch protection rule untuk `main`
+4. Aktifkan `Require a pull request before merging`
+5. Aktifkan `Require status checks to pass before merging`
+6. Pilih status check `CI / test-and-build`
+7. Aktifkan `Restrict who can push to matching branches` bila diperlukan
+8. Nonaktifkan direct push ke `staging` dan `main` untuk developer biasa
+
+### Flow kerja yang disarankan
+
+1. Kerja dan merge perubahan ke `development`
+2. Setelah push ke `development`, review PR promosi `development -> staging`
+3. Setelah lolos verifikasi staging, merge ke `staging`
+4. Setelah push ke `staging`, review PR promosi `staging -> main`
+5. Merge ke `main` hanya setelah final verification
 
 ## Kontribusi
 
