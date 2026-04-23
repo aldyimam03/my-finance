@@ -136,8 +136,8 @@
                     <div class="space-y-6">
                         <label for="notif-1" class="flex items-center justify-between group cursor-pointer">
                             <div>
-                                <p class="font-medium text-sm group-hover:text-primary transition-colors">Laporan Mingguan</p>
-                                <p class="text-[11px] text-on-surface-variant mt-0.5">Terima ringkasan finansial</p>
+                                <p class="font-medium text-sm group-hover:text-primary transition-colors">Ringkasan Bulanan</p>
+                                <p class="text-[11px] text-on-surface-variant mt-0.5">Terima ringkasan pemasukan dan pengeluaran bulan berjalan</p>
                             </div>
                             <span class="relative inline-flex items-center cursor-pointer shrink-0">
                                 <input type="hidden" name="notify_weekly_report" value="0" />
@@ -159,7 +159,7 @@
                         <label for="notif-3" class="flex items-center justify-between opacity-50 hover:opacity-100 transition-opacity cursor-pointer group">
                             <div>
                                 <p class="font-medium text-sm group-hover:text-primary transition-colors">Tips Finansial</p>
-                                <p class="text-[11px] text-on-surface-variant mt-0.5">Rekomendasi dan insight produk di masa depan</p>
+                                <p class="text-[11px] text-on-surface-variant mt-0.5">Tampilkan insight dari pola transaksi dan pengeluaran terbaru</p>
                             </div>
                             <span class="relative inline-flex items-center cursor-pointer shrink-0">
                                 <input type="hidden" name="notify_marketing_tips" value="0" />

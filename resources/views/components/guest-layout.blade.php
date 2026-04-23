@@ -1,4 +1,4 @@
-@props(['title' => 'My Finance', 'stats' => []])
+@props(['title' => 'My Finance'])
 <!DOCTYPE html>
 <html class="dark" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -213,33 +213,18 @@
                         Visual finansial dinamis
                     </div>
                 </div>
-                <!-- Subtle Data Point Visualization (Signature Component) -->
                 @php
-                    $s = array_merge([
-                        'users' => 0,
-                        'transactions' => 0,
-                        'totalAssets' => 0,
-                    ], $stats ?? []);
-
-                    // Format angka ringkas
-                    $fmtNum = fn($n) => $n >= 1_000_000 ? number_format($n/1_000_000, 1, ',', '.').'M'
-                                      : ($n >= 1_000 ? number_format($n/1_000, 1, ',', '.').'K'
-                                      : $n);
-                    $fmtRp  = fn($n) => $n >= 1_000_000_000 ? 'Rp '.number_format($n/1_000_000_000, 1, ',', '.').'B'
-                                      : ($n >= 1_000_000 ? 'Rp '.number_format($n/1_000_000, 1, ',', '.').'M'
-                                      : 'Rp '.number_format($n/1_000, 0, ',', '.').'K');
-
                     $platformStats = [
-                        ['icon' => 'group',              'label' => 'Pengguna Aktif',       'value' => $fmtNum($s['users'])],
-                        ['icon' => 'receipt_long',       'label' => 'Transaksi Tercatat',   'value' => $fmtNum($s['transactions'])],
-                        ['icon' => 'account_balance',    'label' => 'Total Aset Dikelola',  'value' => $fmtRp($s['totalAssets'])],
+                        ['icon' => 'shield_lock', 'label' => 'Privasi Data', 'value' => 'Fokus pada data milik Anda'],
+                        ['icon' => 'insights', 'label' => 'Ringkasan Cepat', 'value' => 'Arus kas dan anggaran mudah dipantau'],
+                        ['icon' => 'task_alt', 'label' => 'Pencatatan Rapi', 'value' => 'Dompet, kategori, dan laporan dalam satu alur'],
                     ];
                 @endphp
                 <div class="grid grid-cols-3 gap-3 max-w-sm">
                     @foreach($platformStats as $stat)
                     <div class="obsidian-glass rounded-xl p-4 flex flex-col gap-2">
                         <span class="material-symbols-outlined text-[18px] text-primary opacity-70" style="font-variation-settings:'FILL' 1">{{ $stat['icon'] }}</span>
-                        <span class="text-lg font-bold text-on-surface leading-tight">{{ $stat['value'] }}</span>
+                        <span class="text-sm font-semibold text-on-surface leading-snug">{{ $stat['value'] }}</span>
                         <span class="text-[9px] uppercase tracking-[0.08em] text-on-surface-variant/60 leading-tight">{{ $stat['label'] }}</span>
                     </div>
                     @endforeach

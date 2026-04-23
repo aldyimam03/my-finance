@@ -15,6 +15,7 @@ return new class extends Migration
             $table->boolean('notify_weekly_report')->default(true)->after('locale');
             $table->boolean('notify_budget_alert')->default(true)->after('notify_weekly_report');
             $table->boolean('notify_marketing_tips')->default(false)->after('notify_budget_alert');
+            $table->timestamp('notif_read_at')->nullable()->after('notify_marketing_tips');
         });
     }
 
@@ -28,6 +29,7 @@ return new class extends Migration
                 'notify_weekly_report',
                 'notify_budget_alert',
                 'notify_marketing_tips',
+                'notif_read_at',
             ]);
         });
     }

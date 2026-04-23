@@ -18,22 +18,12 @@ use App\Models\Wallet;
 
 Route::middleware('guest')->group(function () {
     Route::get('/', function () {
-        $stats = [
-            'users'        => User::count(),
-            'transactions' => Transaction::count(),
-            'totalAssets'  => Wallet::sum('balance'),
-        ];
-        return view('welcome', compact('stats'));
+        return view('welcome');
     })->name('login');
     Route::post('/login', [AuthController::class, 'login']);
 
     Route::get('/register', function () {
-        $stats = [
-            'users'        => User::count(),
-            'transactions' => Transaction::count(),
-            'totalAssets'  => Wallet::sum('balance'),
-        ];
-        return view('register', compact('stats'));
+        return view('register');
     })->name('register');
     Route::post('/register', [AuthController::class, 'register']);
 
@@ -82,8 +72,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/download/pdf', [ReportController::class, 'downloadPdf'])->name('reports.pdf');
     Route::get('/reports/download/excel', [ReportController::class, 'downloadExcel'])->name('reports.excel');
 
-    Route::post('/notifications/mark-read', function () {
-        session(['notif_read_at' => now()->timestamp]);
+    Route::post('/notifications/mark-read', function (\Illuminate\Http\Request $request) {
+        $request->user()->forceFill([
+            'notif_read_at' => now(),
+        ])->save();
+
         return response()->json(['ok' => true]);
     })->name('notifications.mark-read');
 
