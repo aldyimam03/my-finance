@@ -51,7 +51,6 @@
                             <select name="currency" class="w-full bg-surface-container-lowest border border-white/5 rounded-xl px-4 py-3 focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all text-on-surface appearance-none outline-none cursor-pointer">
                                 <option value="IDR" class="bg-surface-container" {{ old('currency', 'IDR') === 'IDR' ? 'selected' : '' }}>IDR - Indonesian Rupiah</option>
                             </select>
-                            <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm">expand_more</span>
                         </div>
                     </div>
                 </div>

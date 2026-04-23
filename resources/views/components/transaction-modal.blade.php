@@ -95,7 +95,6 @@
                                             <option :value="cat.id" x-text="cat.name" class="bg-surface-container"></option>
                                         </template>
                                     </select>
-                                    <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm group-focus-within:text-primary transition-colors">expand_more</span>
                                 </div>
                             </div>
                         </div>
