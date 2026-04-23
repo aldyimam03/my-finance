@@ -132,7 +132,6 @@
                                                 <option :value="wallet.id" x-text="wallet.name"></option>
                                             </template>
                                         </select>
-                                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm">expand_more</span>
                                     </div>
                                 </div>
                                 <!-- Category -->
@@ -144,7 +143,6 @@
                                                 <option :value="cat.id" x-text="cat.name"></option>
                                             </template>
                                         </select>
-                                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm">expand_more</span>
                                     </div>
                                 </div>
                             </div>
@@ -244,7 +242,6 @@
                                                 <option :value="String(wallet.id)" x-text="wallet.name"></option>
                                             </template>
                                         </select>
-                                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm">expand_more</span>
                                     </div>
                                 </div>
 
@@ -257,7 +254,6 @@
                                                 <option :value="String(cat.id)" x-text="cat.name"></option>
                                             </template>
                                         </select>
-                                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm">expand_more</span>
                                     </div>
                                 </div>
                             </div>
