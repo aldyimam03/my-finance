@@ -298,25 +298,25 @@
     <section class="mb-8">
         <div class="bg-surface-container-low p-5 rounded-xl border border-white/5 shadow-xl flex flex-wrap items-center gap-4">
             <form method="GET" action="{{ route('transactions') }}" class="flex flex-wrap gap-4 items-end w-full">
-                <div class="flex-1 min-w-[180px]">
-                    <label class="block font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant mb-2">Filter Tipe</label>
-                    <div class="flex bg-surface-container-lowest p-1 rounded-lg border border-white/10">
+                <div class="flex flex-1 min-w-[180px] flex-col gap-2">
+                    <label class="block font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant">Filter Tipe</label>
+                    <div class="flex h-12 items-stretch gap-1 overflow-hidden bg-surface-container-lowest p-[3px] rounded-xl border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
                         <button type="submit" name="type" value="all"
-                            class="flex-1 py-1.5 text-xs font-semibold rounded-md transition-all {{ request('type', 'all') === 'all' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }}">
+                            class="flex-1 inline-flex h-full items-center justify-center px-4 text-sm leading-none font-semibold rounded-[10px] transition-all {{ request('type', 'all') === 'all' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }}">
                             Semua
                         </button>
                         <button type="submit" name="type" value="income"
-                            class="flex-1 py-1.5 text-xs font-semibold rounded-md transition-all {{ request('type') === 'income' ? 'bg-secondary text-on-secondary shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }}">
+                            class="flex-1 inline-flex h-full items-center justify-center px-4 text-sm leading-none font-semibold rounded-[10px] transition-all {{ request('type') === 'income' ? 'bg-secondary text-on-secondary shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }}">
                             Masuk
                         </button>
                         <button type="submit" name="type" value="expense"
-                            class="flex-1 py-1.5 text-xs font-semibold rounded-md transition-all {{ request('type') === 'expense' ? 'bg-tertiary-container text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }}">
+                            class="flex-1 inline-flex h-full items-center justify-center px-4 text-sm leading-none font-semibold rounded-[10px] transition-all {{ request('type') === 'expense' ? 'bg-tertiary-container text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }}">
                             Keluar
                         </button>
                     </div>
                 </div>
-                <div class="flex-1 min-w-[180px]">
-                    <label class="block font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant mb-2">Dompet</label>
+                <div class="flex flex-1 min-w-[180px] flex-col gap-2">
+                    <label class="block font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant">Dompet</label>
                     <select name="wallet_id" onchange="this.form.submit()"
                         class="w-full bg-surface-container-lowest border border-white/10 rounded-lg py-2.5 px-4 text-on-surface text-sm focus:border-primary/50 transition-colors outline-none">
                         <option value="all">Semua Dompet</option>
@@ -325,20 +325,23 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="flex-1 min-w-[180px]">
-                    <label class="block font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant mb-2">Tanggal</label>
+                <div class="flex flex-1 min-w-[180px] flex-col gap-2">
+                    <label class="block font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant">Tanggal</label>
                     <input type="date" name="date" value="{{ request('date') }}"
                         class="w-full bg-surface-container-lowest border border-white/10 rounded-lg py-2.5 px-4 text-on-surface text-sm focus:border-primary/50 transition-colors outline-none">
                 </div>
-                <div class="flex items-center gap-3">
-                    <button type="submit"
-                        class="px-4 py-2.5 bg-primary text-on-primary text-sm font-semibold rounded-lg shadow-lg shadow-primary/15 hover:scale-[1.02] transition-all">
-                        Terapkan
-                    </button>
-                    <a href="{{ route('transactions') }}"
-                        class="px-4 py-2.5 bg-surface-container-lowest border border-white/10 text-on-surface-variant text-sm font-semibold rounded-lg hover:text-on-surface transition-colors">
-                        Reset
-                    </a>
+                <div class="flex min-w-[203px] flex-col gap-2">
+                    <span class="block font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-transparent select-none">Aksi</span>
+                    <div class="flex items-center gap-3">
+                        <button type="submit"
+                            class="inline-flex h-12 min-w-[96px] items-center justify-center px-5 bg-primary text-on-primary text-sm font-semibold rounded-xl shadow-lg shadow-primary/15 hover:scale-[1.02] transition-all">
+                            Terapkan
+                        </button>
+                        <a href="{{ route('transactions') }}"
+                            class="inline-flex h-12 min-w-[96px] items-center justify-center px-5 bg-surface-container-lowest border border-white/10 text-on-surface-variant text-sm font-semibold rounded-xl hover:text-on-surface transition-colors">
+                            Reset
+                        </a>
+                    </div>
                 </div>
             </form>
         </div>

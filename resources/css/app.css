@@ -117,6 +117,33 @@ select::-ms-expand {
     display: none;
 }
 
+html {
+    scrollbar-color: rgba(173, 198, 255, 0.42) rgba(24, 27, 34, 0.92);
+}
+
+* {
+    scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+    background: rgba(24, 27, 34, 0.92);
+}
+
+*::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(173, 198, 255, 0.46) 0%, rgba(75, 142, 255, 0.52) 100%);
+    border-radius: 999px;
+    border: 2px solid rgba(24, 27, 34, 0.92);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(173, 198, 255, 0.62) 0%, rgba(75, 142, 255, 0.72) 100%);
+}
+
 /* Onboarding Animations */
 @keyframes onboarding-pulse {
     0%, 100% {
@@ -158,4 +185,331 @@ select::-ms-expand {
 
 .onboarding-icon {
     animation: onboarding-bounce 2s infinite;
+}
+
+.finance-picker-open {
+    overflow: hidden;
+}
+
+.finance-picker-native {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.finance-picker-trigger {
+    width: 100%;
+    min-height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(14, 14, 14, 0.92);
+    color: #e5e2e1;
+    text-align: left;
+    transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.finance-picker-trigger:hover {
+    border-color: rgba(173, 198, 255, 0.28);
+    background: rgba(21, 24, 31, 0.96);
+}
+
+.finance-picker-trigger:focus-visible {
+    outline: none;
+    border-color: rgba(173, 198, 255, 0.55);
+    box-shadow: 0 0 0 3px rgba(173, 198, 255, 0.14);
+}
+
+.finance-picker-trigger-copy {
+    min-width: 0;
+    display: block;
+}
+
+.finance-picker-trigger-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #e5e2e1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.finance-picker-trigger.is-placeholder .finance-picker-trigger-value {
+    color: rgba(193, 198, 215, 0.62);
+}
+
+.finance-picker-trigger-icon {
+    flex-shrink: 0;
+    font-size: 1.15rem;
+    color: rgba(173, 198, 255, 0.72);
+}
+
+.finance-picker-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.finance-picker-modal.hidden {
+    display: none;
+}
+
+.finance-picker-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 9, 16, 0.72);
+    backdrop-filter: blur(12px);
+}
+
+.finance-picker-dialog {
+    position: relative;
+    width: min(100%, 30rem);
+    max-height: min(88vh, 42rem);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border-radius: 1.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(28, 27, 27, 0.98) 0%, rgba(17, 19, 24, 0.98) 100%);
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.45);
+}
+
+.finance-picker-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-shrink: 0;
+    padding: 1.4rem 1.4rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.finance-picker-kicker {
+    margin: 0 0 0.35rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(173, 198, 255, 0.72);
+}
+
+.finance-picker-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #e5e2e1;
+}
+
+.finance-picker-subtitle {
+    margin: 0.35rem 0 0;
+    font-size: 0.82rem;
+    color: rgba(193, 198, 215, 0.65);
+    line-height: 1.5;
+}
+
+.finance-picker-close,
+.finance-picker-icon-btn {
+    width: 2.6rem;
+    height: 2.6rem;
+    border: 0;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+    color: #e5e2e1;
+    cursor: pointer;
+    transition: background-color 140ms ease, transform 140ms ease;
+}
+
+.finance-picker-close:hover,
+.finance-picker-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+.finance-picker-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 1rem 1.4rem;
+    max-height: 60vh;
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+
+.finance-picker-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-shrink: 0;
+    padding: 1rem 1.4rem 1.4rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: linear-gradient(180deg, rgba(17, 19, 24, 0.92) 0%, rgba(17, 19, 24, 0.98) 100%);
+}
+
+.finance-picker-primary,
+.finance-picker-secondary {
+    border: 0;
+    border-radius: 0.95rem;
+    padding: 0.82rem 1.1rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 140ms ease, opacity 140ms ease, background-color 140ms ease;
+}
+
+.finance-picker-primary {
+    background: linear-gradient(135deg, #adc6ff 0%, #4b8eff 100%);
+    color: #07111f;
+}
+
+.finance-picker-secondary {
+    background: rgba(255, 255, 255, 0.04);
+    color: #e5e2e1;
+}
+
+.finance-picker-primary:hover,
+.finance-picker-secondary:hover {
+    transform: translateY(-1px);
+}
+
+.finance-picker-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.finance-picker-option {
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+    color: #e5e2e1;
+    border-radius: 1rem;
+    padding: 0.95rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 140ms ease, background-color 140ms ease, transform 140ms ease;
+}
+
+.finance-picker-option:hover {
+    border-color: rgba(173, 198, 255, 0.24);
+    background: rgba(173, 198, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+.finance-picker-option.is-active {
+    border-color: rgba(173, 198, 255, 0.38);
+    background: rgba(173, 198, 255, 0.12);
+}
+
+.finance-picker-option:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.finance-picker-option-text {
+    font-size: 0.94rem;
+    font-weight: 600;
+}
+
+.finance-picker-option-check {
+    opacity: 0;
+    color: #adc6ff;
+}
+
+.finance-picker-option.is-active .finance-picker-option-check {
+    opacity: 1;
+}
+
+.finance-picker-content::-webkit-scrollbar {
+    width: 12px;
+}
+
+.finance-picker-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.finance-picker-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(173, 198, 255, 0.5) 0%, rgba(75, 142, 255, 0.6) 100%);
+    border: 3px solid rgba(22, 24, 31, 0.96);
+}
+
+.finance-calendar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.finance-calendar-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.finance-calendar-month {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #e5e2e1;
+}
+
+.finance-calendar-weekdays,
+.finance-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.45rem;
+}
+
+.finance-calendar-weekdays span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: center;
+    color: rgba(193, 198, 215, 0.52);
+}
+
+.finance-calendar-day {
+    aspect-ratio: 1;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 0.95rem;
+    background: rgba(255, 255, 255, 0.02);
+    color: #e5e2e1;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 140ms ease, background-color 140ms ease, transform 140ms ease;
+}
+
+.finance-calendar-day:hover {
+    border-color: rgba(173, 198, 255, 0.25);
+    background: rgba(173, 198, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+.finance-calendar-day.is-selected {
+    border-color: rgba(173, 198, 255, 0.45);
+    background: linear-gradient(135deg, rgba(173, 198, 255, 0.28) 0%, rgba(75, 142, 255, 0.25) 100%);
+    color: #fff;
+}
+
+.finance-calendar-day.is-muted {
+    color: rgba(193, 198, 215, 0.32);
+}
+
+.finance-calendar-day.is-today {
+    box-shadow: inset 0 0 0 1px rgba(78, 222, 163, 0.38);
 }

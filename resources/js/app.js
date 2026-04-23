@@ -1,7 +1,6 @@
 import './bootstrap';
 import Swal from 'sweetalert2';
 
-// ─── Global financeNumber helper ──────────────────────────────────────────────
 window.financeNumber = {
     sanitize(value) {
         return String(value ?? '')
@@ -14,7 +13,6 @@ window.financeNumber = {
     },
 };
 
-// ─── SweetAlert2 themed instance ──────────────────────────────────────────────
 const Toast = Swal.mixin({
     toast: true,
     position: 'top-end',
@@ -48,20 +46,312 @@ const Confirm = Swal.mixin({
     reverseButtons: true,
 });
 
-window.Toast   = Toast;
+window.Toast = Toast;
 window.Confirm = Confirm;
 
-// ─── Delete confirmation helper ───────────────────────────────────────────────
-// Ganti confirm() biasa pada form delete
-// Usage: <form ... onsubmit="return false" data-confirm="Hapus X ini?">
+const financeModalPicker = (() => {
+    let modalRoot;
+    let titleEl;
+    let subtitleEl;
+    let contentEl;
+    let footerEl;
+    let currentCalendarDate = new Date();
+
+    const monthFormatter = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' });
+    const dayFormatter = new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    const parseDateValue = (value) => {
+        if (!value) return null;
+        const [year, month, day] = value.split('-').map(Number);
+        if (!year || !month || !day) return null;
+        return new Date(year, month - 1, day);
+    };
+
+    const formatDateValue = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const getFieldLabel = (field) => {
+        const wrapper = field.closest('.space-y-2, .space-y-3, .flex-1, .flex.flex-col.gap-2');
+        const label = wrapper?.querySelector('label');
+        return label?.textContent?.trim() || field.dataset.modalTitle || 'Pilih Nilai';
+    };
+
+    const dispatchFieldEvents = (field) => {
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+        field.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+
+    const ensureModal = () => {
+        if (modalRoot) return;
+
+        modalRoot = document.createElement('div');
+        modalRoot.className = 'finance-picker-modal hidden';
+        modalRoot.innerHTML = `
+            <div class="finance-picker-backdrop" data-close-modal></div>
+            <div class="finance-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="finance-picker-title">
+                <div class="finance-picker-header">
+                    <div>
+                        <p class="finance-picker-kicker">Input Custom</p>
+                        <h3 id="finance-picker-title" class="finance-picker-title"></h3>
+                        <p class="finance-picker-subtitle"></p>
+                    </div>
+                    <button type="button" class="finance-picker-close" data-close-modal aria-label="Tutup">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="finance-picker-content"></div>
+                <div class="finance-picker-footer"></div>
+            </div>
+        `;
+
+        document.body.appendChild(modalRoot);
+        titleEl = modalRoot.querySelector('.finance-picker-title');
+        subtitleEl = modalRoot.querySelector('.finance-picker-subtitle');
+        contentEl = modalRoot.querySelector('.finance-picker-content');
+        footerEl = modalRoot.querySelector('.finance-picker-footer');
+
+        modalRoot.addEventListener('click', (event) => {
+            if (event.target instanceof HTMLElement && event.target.closest('[data-close-modal]')) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !modalRoot.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+    };
+
+    const closeModal = () => {
+        if (!modalRoot) return;
+        modalRoot.classList.add('hidden');
+        document.body.classList.remove('finance-picker-open');
+        contentEl.innerHTML = '';
+        footerEl.innerHTML = '';
+    };
+
+    const openModalShell = (field, subtitle) => {
+        ensureModal();
+        titleEl.textContent = getFieldLabel(field);
+        subtitleEl.textContent = subtitle;
+        modalRoot.classList.remove('hidden');
+        document.body.classList.add('finance-picker-open');
+    };
+
+    const syncTriggerLabel = (field) => {
+        const trigger = field._financeTrigger;
+        if (!trigger) return;
+
+        const valueEl = trigger.querySelector('[data-picker-value]');
+        if (!valueEl) return;
+
+        if (field.tagName === 'SELECT') {
+            const selectedOption = field.options[field.selectedIndex];
+            valueEl.textContent = selectedOption?.textContent?.trim() || field.dataset.placeholder || 'Pilih opsi';
+            trigger.classList.toggle('is-placeholder', !selectedOption || selectedOption.value === '');
+            return;
+        }
+
+        const selectedDate = parseDateValue(field.value);
+        valueEl.textContent = selectedDate ? dayFormatter.format(selectedDate) : field.dataset.placeholder || 'Pilih tanggal';
+        trigger.classList.toggle('is-placeholder', !selectedDate);
+    };
+
+    const setFieldValue = (field, value) => {
+        field.value = value;
+        dispatchFieldEvents(field);
+        syncTriggerLabel(field);
+    };
+
+    const renderSelectModal = (field) => {
+        openModalShell(field, 'Pilih opsi dari modal agar tampilannya konsisten di semua halaman.');
+
+        const list = document.createElement('div');
+        list.className = 'finance-picker-list';
+
+        Array.from(field.options).forEach((option) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'finance-picker-option';
+            if (option.selected) button.classList.add('is-active');
+            if (option.disabled) button.disabled = true;
+            button.innerHTML = `
+                <span class="finance-picker-option-text">${option.textContent?.trim() || '-'}</span>
+                <span class="material-symbols-outlined finance-picker-option-check">check</span>
+            `;
+            button.addEventListener('click', () => {
+                setFieldValue(field, option.value);
+                closeModal();
+            });
+            list.appendChild(button);
+        });
+
+        contentEl.replaceChildren(list);
+        footerEl.innerHTML = '<button type="button" class="finance-picker-secondary" data-close-modal>Tutup</button>';
+    };
+
+    const renderDateModal = (field) => {
+        openModalShell(field, 'Pilih tanggal dari kalender custom tanpa date picker bawaan browser.');
+        currentCalendarDate = parseDateValue(field.value) ?? new Date();
+
+        const drawCalendar = () => {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startOffset = (firstDay.getDay() + 6) % 7;
+            const totalCells = Math.ceil((startOffset + lastDay.getDate()) / 7) * 7;
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'finance-calendar';
+            wrapper.innerHTML = `
+                <div class="finance-calendar-toolbar">
+                    <button type="button" class="finance-picker-icon-btn" data-nav="-1">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <div class="finance-calendar-month">${monthFormatter.format(currentCalendarDate)}</div>
+                    <button type="button" class="finance-picker-icon-btn" data-nav="1">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
+                </div>
+                <div class="finance-calendar-weekdays"></div>
+                <div class="finance-calendar-grid"></div>
+            `;
+
+            const weekdays = wrapper.querySelector('.finance-calendar-weekdays');
+            ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].forEach((day) => {
+                const dayEl = document.createElement('span');
+                dayEl.textContent = day;
+                weekdays?.appendChild(dayEl);
+            });
+
+            const grid = wrapper.querySelector('.finance-calendar-grid');
+            for (let index = 0; index < totalCells; index += 1) {
+                const dayNumber = index - startOffset + 1;
+                const date = new Date(year, month, dayNumber);
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'finance-calendar-day';
+                button.textContent = String(date.getDate());
+                if (date.getMonth() !== month) button.classList.add('is-muted');
+                if (field.value === formatDateValue(date)) button.classList.add('is-selected');
+                if (formatDateValue(date) === formatDateValue(new Date())) button.classList.add('is-today');
+                button.addEventListener('click', () => {
+                    setFieldValue(field, formatDateValue(date));
+                    closeModal();
+                });
+                grid?.appendChild(button);
+            }
+
+            wrapper.querySelectorAll('[data-nav]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const direction = Number(button.getAttribute('data-nav'));
+                    currentCalendarDate = new Date(year, month + direction, 1);
+                    drawCalendar();
+                });
+            });
+
+            contentEl.replaceChildren(wrapper);
+            footerEl.innerHTML = '';
+
+            if (!field.required && field.value) {
+                const clearButton = document.createElement('button');
+                clearButton.type = 'button';
+                clearButton.className = 'finance-picker-secondary';
+                clearButton.textContent = 'Hapus';
+                clearButton.addEventListener('click', () => {
+                    setFieldValue(field, '');
+                    closeModal();
+                });
+                footerEl.appendChild(clearButton);
+            }
+
+            const todayButton = document.createElement('button');
+            todayButton.type = 'button';
+            todayButton.className = 'finance-picker-primary';
+            todayButton.textContent = 'Pilih Hari Ini';
+            todayButton.addEventListener('click', () => {
+                setFieldValue(field, formatDateValue(new Date()));
+                closeModal();
+            });
+            footerEl.appendChild(todayButton);
+        };
+
+        drawCalendar();
+    };
+
+    const hideNativeAdornment = (field) => {
+        const parent = field.parentElement;
+        if (!parent) return;
+        parent.querySelectorAll('span.pointer-events-none').forEach((element) => {
+            element.classList.add('hidden');
+        });
+    };
+
+    const enhanceField = (field) => {
+        if (!(field instanceof HTMLSelectElement || (field instanceof HTMLInputElement && field.type === 'date'))) return;
+        if (field.multiple || field.dataset.financePickerEnhanced === 'true') return;
+
+        field.dataset.financePickerEnhanced = 'true';
+        field.classList.add('finance-picker-native');
+        hideNativeAdornment(field);
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'finance-picker-trigger is-placeholder';
+        trigger.innerHTML = `
+            <span class="finance-picker-trigger-copy">
+                <span class="finance-picker-trigger-value" data-picker-value></span>
+            </span>
+            <span class="material-symbols-outlined finance-picker-trigger-icon">${field.tagName === 'SELECT' ? 'unfold_more' : 'calendar_month'}</span>
+        `;
+
+        trigger.addEventListener('click', () => {
+            if (field.disabled) return;
+            if (field.tagName === 'SELECT') {
+                renderSelectModal(field);
+            } else {
+                renderDateModal(field);
+            }
+        });
+
+        field.insertAdjacentElement('afterend', trigger);
+        field._financeTrigger = trigger;
+
+        field.addEventListener('change', () => syncTriggerLabel(field));
+        field.addEventListener('input', () => syncTriggerLabel(field));
+
+        const observer = new MutationObserver(() => syncTriggerLabel(field));
+        observer.observe(field, {
+            attributes: true,
+            childList: true,
+            subtree: true,
+            characterData: true,
+        });
+
+        syncTriggerLabel(field);
+    };
+
+    const enhanceAll = (root = document) => {
+        root.querySelectorAll('select, input[type="date"]').forEach(enhanceField);
+    };
+
+    return { enhanceAll };
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('form[data-confirm]').forEach(form => {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const msg = form.dataset.confirm ?? 'Apakah Anda yakin?';
+    document.querySelectorAll('form[data-confirm]').forEach((form) => {
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const message = form.dataset.confirm ?? 'Apakah Anda yakin?';
             const result = await Confirm.fire({
                 title: 'Konfirmasi Hapus',
-                text: msg,
+                text: message,
                 icon: 'warning',
                 confirmButtonText: 'Ya, Hapus!',
             });
@@ -69,7 +359,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // ─── Auto-show flash toast dari session (data-flash-* di body) ────────────
     const body = document.body;
     if (body.dataset.flashSuccess) {
         Toast.fire({ icon: 'success', title: body.dataset.flashSuccess });
@@ -83,4 +372,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (body.dataset.flashInfo) {
         Toast.fire({ icon: 'info', title: body.dataset.flashInfo });
     }
+
+    financeModalPicker.enhanceAll(document);
+
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+                if (node instanceof HTMLElement) {
+                    financeModalPicker.enhanceAll(node);
+                }
+            });
+        });
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+    });
 });
