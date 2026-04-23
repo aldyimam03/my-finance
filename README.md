@@ -59,6 +59,10 @@ Lakukan ini di GitHub repository settings:
 7. Aktifkan `Restrict who can push to matching branches` bila diperlukan
 8. Nonaktifkan direct push ke `staging` dan `main` untuk developer biasa
 
+Catatan untuk workflow promosi:
+- Jika GitHub menolak pembuatan PR dari GitHub Actions (error `GitHub Actions is not permitted to create or approve pull requests`), aktifkan `Settings -> Actions -> General -> Workflow permissions` ke `Read and write permissions` dan centang `Allow GitHub Actions to create and approve pull requests`.
+- Alternatif tanpa mengubah setting di atas: buat secret repo bernama `PROMOTION_TOKEN` berisi Personal Access Token (PAT) yang punya akses `pull requests` dan `contents`, lalu workflow akan otomatis memakai token tersebut.
+
 ### Flow kerja yang disarankan
 
 1. Kerja dan merge perubahan ke `development`
