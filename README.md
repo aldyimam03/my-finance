@@ -1,6 +1,5 @@
 # My Finance
 
-[![CI](https://github.com/aldyimam03/my-finance/actions/workflows/ci.yml/badge.svg)](https://github.com/aldyimam03/my-finance/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 Aplikasi manajemen keuangan pribadi berbasis web (Laravel) untuk mencatat transaksi, dompet, kategori, dan anggaran.
@@ -11,6 +10,15 @@ Aplikasi manajemen keuangan pribadi berbasis web (Laravel) untuk mencatat transa
 - Pencarian transaksi/laporan dengan saran otomatis
 - UI modern (Vite) dengan layout guest + dashboard
 - Seed data untuk development
+
+## Cara Menggunakan
+
+1. Daftar akun atau login.
+2. Buat atau pilih `Dompet` (mis. BCA, Mandiri, Tunai).
+3. Buat `Kategori` transaksi (mis. Belanja, Makan, Transport).
+4. Tambahkan `Transaksi` pemasukan/pengeluaran, pilih dompet + kategori, isi nominal dan tanggal.
+5. (Opsional) Atur `Anggaran` per kategori, lalu pantau analisis pemakaian anggaran.
+6. Lihat ringkasan dan laporan di dashboard.
 
 ## Teknologi
 
@@ -61,46 +69,6 @@ php artisan serve
 ```bash
 composer test
 ```
-
-## Alur Branch & CI
-
-Branch yang dipakai:
-
-- `development`: kerja harian
-- `staging`: kandidat rilis
-- `main`: production
-
-Workflow yang tersedia:
-
-- `CI` jalan di `development`, `staging`, `main`
-- `Promote Branches` membuat PR promosi:
-  - push ke `development` -> PR ke `staging`
-  - push ke `staging` -> PR ke `main`
-
-File workflow:
-
-- `.github/workflows/ci.yml`
-- `.github/workflows/promote-branches.yml`
-
-### Branch Protection (Disarankan)
-
-Atur di GitHub:
-
-1. `Settings -> Branches`
-2. Buat rule untuk `staging` dan `main`
-3. Aktifkan `Require a pull request before merging`
-4. Aktifkan `Require status checks to pass before merging`
-5. Pilih status check `CI / test-and-build`
-
-### Permission Untuk Workflow Promosi
-
-Jika muncul error `GitHub Actions is not permitted to create or approve pull requests`:
-
-1. `Settings -> Actions -> General -> Workflow permissions`
-2. Pilih `Read and write permissions`
-3. Centang `Allow GitHub Actions to create and approve pull requests`
-
-Alternatif (lebih stabil): buat repo secret `PROMOTION_TOKEN` berisi PAT yang punya akses `Contents` + `Pull requests`.
 
 ## Kontribusi
 
