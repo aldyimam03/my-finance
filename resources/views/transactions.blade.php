@@ -316,8 +316,18 @@
                     <select name="wallet_id" onchange="this.form.submit()"
                         class="w-full bg-surface-container-lowest border border-white/10 rounded-lg py-2.5 px-4 text-on-surface text-sm focus:border-primary/50 transition-colors outline-none">
                         <option value="all">Semua Dompet</option>
-                        @foreach(auth()->user()->wallets as $w)
+                        @foreach($wallets as $w)
                         <option value="{{ $w->id }}" {{ request('wallet_id') == $w->id ? 'selected' : '' }}>{{ $w->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="flex flex-1 min-w-[180px] flex-col gap-2">
+                    <label class="block font-['Inter'] text-[11px] uppercase tracking-[0.05em] text-on-surface-variant">Kategori</label>
+                    <select name="category_id" onchange="this.form.submit()"
+                        class="w-full bg-surface-container-lowest border border-white/10 rounded-lg py-2.5 px-4 text-on-surface text-sm focus:border-primary/50 transition-colors outline-none">
+                        <option value="all">Semua Kategori</option>
+                        @foreach($categories as $category)
+                        <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
                         @endforeach
                     </select>
                 </div>
