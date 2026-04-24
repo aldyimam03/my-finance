@@ -9,6 +9,40 @@ use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
 {
+    private function allowedIcons(): array
+    {
+        return [
+            'category',
+            'label',
+            'payments',
+            'account_balance_wallet',
+            'credit_card',
+            'savings',
+            'trending_up',
+            'shopping_cart',
+            'shopping_bag',
+            'restaurant',
+            'local_cafe',
+            'directions_car',
+            'local_gas_station',
+            'movie',
+            'subscriptions',
+            'wifi',
+            'phone_android',
+            'school',
+            'fitness_center',
+            'medical_services',
+            'home',
+            'pets',
+            'celebration',
+            'volunteer_activism',
+            'groups',
+            'handyman',
+            'bolt',
+            'more_horiz',
+        ];
+    }
+
     public function index()
     {
         $categories = Auth::user()->categories()->orderBy('name')->get();
@@ -24,10 +58,12 @@ class CategoryController extends Controller
                 'max:255',
                 Rule::unique('categories')->where(fn ($query) => $query->where('user_id', Auth::id()))
             ],
+            'icon' => ['nullable', 'string', Rule::in($this->allowedIcons())],
         ]);
 
         // type disimpan sebagai 'general' agar NOT NULL constraint terpenuhi
         $validated['type'] = 'general';
+        $validated['icon'] = $validated['icon'] ?? 'label';
 
         Auth::user()->categories()->create($validated);
 
@@ -45,7 +81,12 @@ class CategoryController extends Controller
                 'max:255',
                 Rule::unique('categories')->where(fn ($query) => $query->where('user_id', Auth::id()))->ignore($category->id)
             ],
+            'icon' => ['nullable', 'string', Rule::in($this->allowedIcons())],
         ]);
+
+        if (!array_key_exists('icon', $validated) || $validated['icon'] === null) {
+            $validated['icon'] = $category->icon ?? 'label';
+        }
 
         $category->update($validated);
 

@@ -7,6 +7,36 @@
                 editModal: false,
                 showTour: @json(request('tour') === '1' && auth()->check() && !auth()->user()->onboarding_completed),
                 tourStep: 1,
+                iconOptions: [
+                    'label',
+                    'category',
+                    'payments',
+                    'account_balance_wallet',
+                    'credit_card',
+                    'savings',
+                    'trending_up',
+                    'shopping_cart',
+                    'shopping_bag',
+                    'restaurant',
+                    'local_cafe',
+                    'directions_car',
+                    'local_gas_station',
+                    'movie',
+                    'subscriptions',
+                    'wifi',
+                    'phone_android',
+                    'school',
+                    'fitness_center',
+                    'medical_services',
+                    'home',
+                    'pets',
+                    'celebration',
+                    'volunteer_activism',
+                    'groups',
+                    'handyman',
+                    'bolt',
+                    'more_horiz',
+                ],
                 tourSteps: [
                     { ref: 'sidebarCategory', title: 'Menu Kategori', text: 'Klik menu ini untuk membuka halaman pengelolaan kategori transaksi.' },
                     { ref: 'tourHeader', title: 'Halaman Kategori', text: 'Di sini kamu dapat membuat dan mengelola kategori transaksi seperti Belanja, Gaji, atau Investasi.' },
@@ -17,13 +47,21 @@
                 ],
                 tourHighlight: { left: '0px', top: '0px', width: '0px', height: '0px' },
                 tooltipStyle: { top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'min(95vw, 30rem)' },
-                editData: { id: null, name: '' },
-                openEdit(id, name) {
-                    this.editData = { id, name };
+                addData: { name: '', icon: 'label' },
+                editData: { id: null, name: '', icon: 'label' },
+                openEdit(id, name, icon) {
+                    this.editData = { id, name, icon: icon || 'label' };
                     this.editModal = true;
                 },
                 openAddModal() {
+                    this.addData = { name: '', icon: 'label' };
                     this.showAddModal = true;
+                },
+                selectAddIcon(icon) {
+                    this.addData.icon = icon;
+                },
+                selectEditIcon(icon) {
+                    this.editData.icon = icon;
                 },
                 get activeTourStep() {
                     return this.tourSteps[this.tourStep - 1];
@@ -223,6 +261,9 @@
             <div class="divide-y divide-white/5">
                 @forelse($categories as $cat)
                 <div class="flex items-center gap-4 px-6 py-4 hover:bg-white/5 transition-colors group">
+                    <div class="h-10 w-10 shrink-0 rounded-xl bg-surface-container-highest flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined">{{ $cat->icon ?? 'label' }}</span>
+                    </div>
                     <div class="flex-1">
                         <p class="font-semibold text-sm text-on-surface">{{ $cat->name }}</p>
                         <p class="text-[10px] text-on-surface-variant/60 uppercase tracking-wider mt-0.5">
@@ -230,7 +271,7 @@
                         </p>
                     </div>
                     <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button @click="openEdit({{ $cat->id }}, '{{ addslashes($cat->name) }}')"
+                        <button @click="openEdit({{ $cat->id }}, '{{ addslashes($cat->name) }}', '{{ addslashes($cat->icon ?? 'label') }}')"
                             class="p-2 rounded-lg hover:bg-primary/10 text-on-surface-variant hover:text-primary transition-colors">
                             <span class="material-symbols-outlined text-sm">edit</span>
                         </button>
@@ -294,9 +335,33 @@
                         </div>
                         <div class="p-7">
                             <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-2">Nama Kategori</label>
-                            <input name="name" type="text" required autofocus
+                            <input name="name" type="text" required autofocus x-model="addData.name"
                                 class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/30 outline-none placeholder:text-on-surface-variant/30"
                                 placeholder="Contoh: Makan Siang, Gaji, Hiburan...">
+
+                            <div class="mt-6">
+                                <div class="flex items-center justify-between gap-3 mb-2">
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block">Ikon</label>
+                                    <div class="flex items-center gap-2 text-[11px] text-on-surface-variant/70">
+                                        <span class="material-symbols-outlined text-[18px] text-primary">auto_awesome</span>
+                                        <span x-text="addData.icon"></span>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="icon" :value="addData.icon" />
+                                <div class="grid grid-cols-7 gap-2">
+                                    <template x-for="ic in iconOptions" :key="ic">
+                                        <button type="button"
+                                            @click="selectAddIcon(ic)"
+                                            class="h-11 rounded-xl border transition-all flex items-center justify-center"
+                                            :class="addData.icon === ic ? 'border-primary/50 bg-primary/10 text-primary shadow-lg shadow-primary/10 scale-[1.02]' : 'border-white/10 bg-surface-container-highest text-on-surface-variant hover:bg-white/5 hover:text-on-surface'">
+                                            <span class="material-symbols-outlined text-[20px]" x-text="ic"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                                <p class="mt-2 text-[11px] text-on-surface-variant/50">
+                                    Pilih ikon yang paling menggambarkan kategori ini.
+                                </p>
+                            </div>
                         </div>
                         <div class="px-7 py-5 bg-surface-container-high/40 border-t border-white/5 flex gap-3">
                             <button type="submit"
@@ -344,6 +409,27 @@
                             <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-2">Nama Kategori</label>
                             <input name="name" type="text" x-model="editData.name" required
                                 class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/30 outline-none">
+
+                            <div class="mt-6">
+                                <div class="flex items-center justify-between gap-3 mb-2">
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block">Ikon</label>
+                                    <div class="flex items-center gap-2 text-[11px] text-on-surface-variant/70">
+                                        <span class="material-symbols-outlined text-[18px] text-primary">auto_awesome</span>
+                                        <span x-text="editData.icon"></span>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="icon" :value="editData.icon" />
+                                <div class="grid grid-cols-7 gap-2">
+                                    <template x-for="ic in iconOptions" :key="ic">
+                                        <button type="button"
+                                            @click="selectEditIcon(ic)"
+                                            class="h-11 rounded-xl border transition-all flex items-center justify-center"
+                                            :class="editData.icon === ic ? 'border-primary/50 bg-primary/10 text-primary shadow-lg shadow-primary/10 scale-[1.02]' : 'border-white/10 bg-surface-container-highest text-on-surface-variant hover:bg-white/5 hover:text-on-surface'">
+                                            <span class="material-symbols-outlined text-[20px]" x-text="ic"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
                         <div class="px-7 py-5 bg-surface-container-high/40 border-t border-white/5 flex gap-3">
                             <button type="submit"
