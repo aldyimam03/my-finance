@@ -500,6 +500,9 @@ const financeModalPicker = (() => {
     const enhanceField = (field) => {
         if (!(field instanceof HTMLSelectElement || (field instanceof HTMLInputElement && field.type === 'date'))) return;
         if (field.multiple || field.dataset.financePickerEnhanced === 'true') return;
+        // SweetAlert2 keeps hidden input/select elements in the DOM; don't enhance them.
+        if (field.closest('.swal2-container, .swal2-popup')) return;
+        if (field.classList.contains('swal2-select') || field.classList.contains('swal2-input')) return;
 
         field.dataset.financePickerEnhanced = 'true';
         field.classList.add('finance-picker-native');
