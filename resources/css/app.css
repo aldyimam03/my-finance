@@ -553,3 +553,48 @@ html {
 .swal-btn-cancel {
     color: rgba(229, 226, 225, 0.92) !important;
 }
+
+/* Inline validation tooltip (simple, themed) */
+.finance-validate-tip {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 60;
+    max-width: min(320px, calc(100vw - 24px));
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+    transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.finance-validate-tip.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.finance-validate-tip-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 0.95rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(30, 37, 48, 0.92);
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(16px);
+    color: rgba(229, 226, 225, 0.92);
+}
+
+.finance-validate-tip-icon {
+    font-size: 18px;
+    line-height: 1.15;
+    color: rgba(255, 178, 183, 0.95);
+    margin-top: 1px;
+    flex: 0 0 auto;
+}
+
+.finance-validate-tip-text {
+    font-size: 0.9rem;
+    line-height: 1.35;
+    font-weight: 650;
+}
