@@ -28,6 +28,10 @@ class TransactionController extends Controller
             $query->where('wallet_id', $request->wallet_id);
         }
 
+        if ($request->has('category_id') && $request->category_id != 'all') {
+            $query->where('category_id', $request->category_id);
+        }
+
         if ($request->filled('date')) {
             $query->whereDate('date', $request->date);
         }
