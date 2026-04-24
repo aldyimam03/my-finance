@@ -38,7 +38,7 @@ Route::view('/help', 'info.help')->name('help');
 Route::view('/privacy', 'info.privacy')->name('privacy');
 Route::view('/security', 'info.security')->name('security');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'nocache'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
