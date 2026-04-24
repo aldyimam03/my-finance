@@ -49,6 +49,210 @@ const Confirm = Swal.mixin({
 window.Toast = Toast;
 window.Confirm = Confirm;
 
+const financeInlineValidation = (() => {
+    let tipEl;
+    let tipTextEl;
+    let hideTimer;
+    let activeField;
+
+    const shouldHandleForm = (form) =>
+        form instanceof HTMLFormElement && form.dataset.nativeValidate !== 'true';
+
+    const ensureTip = () => {
+        if (tipEl) return;
+
+        tipEl = document.createElement('div');
+        tipEl.className = 'finance-validate-tip';
+        tipEl.setAttribute('role', 'status');
+        tipEl.setAttribute('aria-live', 'polite');
+        tipEl.innerHTML = `
+            <div class="finance-validate-tip-inner">
+                <span class="material-symbols-outlined finance-validate-tip-icon" aria-hidden="true">error</span>
+                <span class="finance-validate-tip-text"></span>
+            </div>
+        `;
+
+        document.body.appendChild(tipEl);
+        tipTextEl = tipEl.querySelector('.finance-validate-tip-text');
+    };
+
+    const getFieldLabel = (field) => {
+        if (!(field instanceof HTMLElement)) return 'kolom ini';
+
+        const ariaLabel = field.getAttribute('aria-label')?.trim();
+        if (ariaLabel) return ariaLabel;
+
+        const id = field.getAttribute('id');
+        if (id) {
+            const label = document.querySelector(`label[for="${CSS.escape(id)}"]`);
+            const text = label?.textContent?.trim();
+            if (text) return text;
+        }
+
+        const wrapper = field.closest('.space-y-2, .space-y-3, .flex-1, .flex.flex-col.gap-2');
+        const label = wrapper?.querySelector('label');
+        const labelText = label?.textContent?.trim();
+        if (labelText) return labelText;
+
+        const placeholder =
+            field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement
+                ? field.placeholder?.trim()
+                : null;
+        if (placeholder) return placeholder;
+
+        const name = field.getAttribute('name')?.trim();
+        if (name) return name;
+
+        return 'kolom ini';
+    };
+
+    const messageFor = (field) => {
+        if (!(field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement)) {
+            return 'Harap lengkapi input yang dibutuhkan.';
+        }
+
+        const v = field.validity;
+        const label = getFieldLabel(field);
+
+        if (v.valueMissing) return `Harap isi ${label}.`;
+        if (v.typeMismatch) {
+            if (field instanceof HTMLInputElement && field.type === 'email') return 'Masukkan email yang valid.';
+            return `Format ${label} tidak valid.`;
+        }
+        if (v.tooShort) return `${label} minimal ${field.minLength} karakter.`;
+        if (v.tooLong) return `${label} maksimal ${field.maxLength} karakter.`;
+        if (v.patternMismatch) return `Format ${label} tidak sesuai.`;
+        if (v.rangeUnderflow) return `${label} minimal ${field.min}.`;
+        if (v.rangeOverflow) return `${label} maksimal ${field.max}.`;
+
+        return `Harap periksa kembali ${label}.`;
+    };
+
+    const getAnchorEl = (field) => {
+        if (field?._financeTrigger instanceof HTMLElement) return field._financeTrigger;
+        if (field instanceof HTMLElement) return field;
+        return null;
+    };
+
+    const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+    const placeTip = (anchor) => {
+        if (!tipEl || !(anchor instanceof HTMLElement)) return;
+
+        const rect = anchor.getBoundingClientRect();
+        const margin = 12;
+        const preferredTop = rect.bottom + 10;
+        const tipRect = tipEl.getBoundingClientRect();
+
+        const maxLeft = window.innerWidth - tipRect.width - margin;
+        const left = clamp(rect.left + rect.width / 2 - tipRect.width / 2, margin, maxLeft);
+
+        let top = preferredTop;
+        if (preferredTop + tipRect.height + margin > window.innerHeight) {
+            top = rect.top - tipRect.height - 10;
+        }
+
+        top = clamp(top, margin, window.innerHeight - tipRect.height - margin);
+
+        tipEl.style.left = `${Math.round(left)}px`;
+        tipEl.style.top = `${Math.round(top)}px`;
+    };
+
+    const hideTip = () => {
+        if (!tipEl) return;
+        tipEl.classList.remove('is-visible');
+        activeField = null;
+        clearTimeout(hideTimer);
+        hideTimer = null;
+    };
+
+    const showForField = (field) => {
+        ensureTip();
+        activeField = field;
+
+        if (tipTextEl) tipTextEl.textContent = messageFor(field);
+        tipEl.classList.add('is-visible');
+
+        const anchor = getAnchorEl(field);
+        placeTip(anchor);
+
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(hideTip, 3200);
+    };
+
+    const focusField = (field) => {
+        const target = getAnchorEl(field);
+        if (!(target instanceof HTMLElement)) return;
+        target.focus({ preventScroll: true });
+        target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    };
+
+    const install = () => {
+        // Suppress native bubbles and use our tooltip instead (simple + themed).
+        document.addEventListener(
+            'invalid',
+            (event) => {
+                const field = event.target;
+                const form = field instanceof HTMLElement ? field.form : null;
+                if (!shouldHandleForm(form)) return;
+                event.preventDefault();
+            },
+            true
+        );
+
+        document.addEventListener(
+            'submit',
+            (event) => {
+                const form = event.target;
+                if (!shouldHandleForm(form)) return;
+
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+
+                    const invalid = form.querySelector(':invalid');
+                    if (invalid instanceof HTMLElement) {
+                        showForField(invalid);
+                        focusField(invalid);
+                    }
+                }
+            },
+            true
+        );
+
+        document.addEventListener(
+            'input',
+            (event) => {
+                const field = event.target;
+                if (!(field instanceof HTMLElement)) return;
+                if (activeField && (field === activeField || field === activeField._financeTrigger)) {
+                    hideTip();
+                }
+            },
+            true
+        );
+
+        document.addEventListener(
+            'change',
+            (event) => {
+                const field = event.target;
+                if (!(field instanceof HTMLElement)) return;
+                if (activeField && field === activeField) hideTip();
+            },
+            true
+        );
+
+        document.addEventListener('scroll', () => placeTip(getAnchorEl(activeField)), true);
+        window.addEventListener('resize', () => placeTip(getAnchorEl(activeField)));
+
+        document.querySelectorAll('form').forEach((form) => {
+            if (shouldHandleForm(form)) form.noValidate = true;
+        });
+    };
+
+    return { install };
+})();
+
 const financeModalPicker = (() => {
     let modalRoot;
     let titleEl;
@@ -345,6 +549,8 @@ const financeModalPicker = (() => {
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
+    financeInlineValidation.install();
+
     document.querySelectorAll('form[data-confirm]').forEach((form) => {
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
